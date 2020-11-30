@@ -1,11 +1,11 @@
 [package]
 name = "api_server"
 version = "0.2.0"
-authors = ["Yale Cason <yale.cason@gmail.com>", "Mike Farrell <mrmikefarrell@gmail.com>"]
+authors = ["Matt Burke <spraints@gmail.com>", "Yale Cason <yale.cason@gmail.com>", "Mike Farrell <mrmikefarrell@gmail.com>"]
 
 [dependencies]
-rocket = "0.4"
-diesel = { version = "1.4.1", features = ["postgres"] }
+rocket = "0.4.6"
+diesel = { version = "1.4.4", features = ["postgres"] }
 serde = "1.0"
 serde_derive = "1.0"
 
