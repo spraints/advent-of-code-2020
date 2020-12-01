@@ -1,6 +1,7 @@
 import * as React from 'react';
 
 import Day from './Day';
+import Day1 from './Day1';
 
 class App extends React.Component<{}, { apiMessage: string }> {
   constructor(props: object) {
@@ -30,7 +31,7 @@ class App extends React.Component<{}, { apiMessage: string }> {
             Matt's Advent of Code 2020
           </h1>
         </div>
-        <Day num="1" />
+        <Day num="1"><Day1/></Day>
         <h2>Status</h2>
         <p>
           {this.state.apiMessage}

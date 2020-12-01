@@ -35,9 +35,7 @@ class Day extends React.Component<IProps, IState> {
         <div className="row" onClick={this.hide}>
           <h2>Day {this.props.num}</h2>
         </div>
-        <div className="row">
-          (TODO - form for today's input)
-        </div>
+        {this.props.children}
       </div>
     )
   }
