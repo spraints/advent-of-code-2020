@@ -1,7 +1,4 @@
 import * as React from 'react';
-import './App.css';
-
-import logo from './logo.svg';
 
 class App extends React.Component<{}, { apiMessage: string }> {
   constructor(props: object) {
@@ -25,14 +22,13 @@ class App extends React.Component<{}, { apiMessage: string }> {
 
   public render() {
     return (
-      <div className="App">
-        <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <h1 className="App-title">Welcome to React</h1>
-        </header>
-        <p className="App-intro">
-          To get started, edit <code>src/App.tsx</code> and save to reload.
-        </p>
+      <div className="p-3 container">
+        <div className="jumbotron">
+          <h1 className="header">
+            Matt's Advent of Code 2020
+          </h1>
+        </div>
+        <h2>Status</h2>
         <p>
           {this.state.apiMessage}
         </p>
