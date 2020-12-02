@@ -16,5 +16,9 @@ services:
     ports: 
       - "3001:3001"
     volumes:
-      - ./api_server:/usr/src/app
+      - "./api_server:/usr/src/app"
+      - "api_server_cargo:/usr/local/cargo"
     command: "cargo watch -x run"
+
+volumes:
+  api_server_cargo:
