@@ -4,6 +4,7 @@ const PASSWORD_LINE = /(\d+)-(\d+) (.): (.*)/g
 const PASSWORD_LINE2 = /(\d+)-(\d+) (.): (.*)/
 
 interface IState {
+  part2: boolean
   input: string
   output: IOutput | null
 }
@@ -27,16 +28,28 @@ interface IPasswordPolicy {
 class Today extends React.Component<{}, IState> {
   constructor(props: any) {
     super(props)
-    this.state = { input: '', output: null }
+    this.state = { part2: false, input: '', output: null }
     this.solve = this.solve.bind(this)
+    this.setPart1 = this.setPart1.bind(this)
+    this.setPart2 = this.setPart2.bind(this)
     this.inputChanged = this.inputChanged.bind(this)
   }
 
   public render() {
+    const PartButtons = () => this.state.part2 ? (
+      <div>
+        <button onClick={this.setPart1}>Part 1</button> | <b>Part 2</b>
+      </div>
+    ) : (
+      <div>
+        <b>Part 1</b> | <button onClick={this.setPart2}>Part 2</button>
+      </div>
+    )
     return (
       <div className="row">
         <div className="col">
           <h3>Input</h3>
+          <PartButtons/>
           <textarea rows={10} onChange={this.inputChanged} value={this.state.input}/><br/>
           <button onClick={this.solve}>Solve!</button>
         </div>
@@ -88,7 +101,7 @@ class Today extends React.Component<{}, IState> {
       // console.log(passwords)
 
       const req = {
-        body: JSON.stringify({lines}),
+        body: JSON.stringify({lines, part2: this.state.part2}),
         headers: {"Content-Type": "application/json"},
         method: "POST"
       }
@@ -101,6 +114,14 @@ class Today extends React.Component<{}, IState> {
       return
     }
     r.json().then((output: IOutput) => this.setState({output}))
+  }
+
+  private setPart1() {
+    this.setState({part2: false})
+  }
+
+  private setPart2() {
+    this.setState({part2: true})
   }
 
   private inputChanged(ev: React.ChangeEvent<HTMLTextAreaElement>) {
