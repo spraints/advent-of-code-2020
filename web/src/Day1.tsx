@@ -4,7 +4,6 @@ import IDayProps from './DayProps'
 const NUMBERS = /\d+/g
 
 interface IState {
-  input: string
   output: IOutput | null
 }
 
@@ -16,28 +15,17 @@ interface IOutput {
 class Day1 extends React.Component<IDayProps, IState> {
   constructor(props: IDayProps) {
     super(props)
-    this.state = { input: '', output: null }
-    this.solve = this.solve.bind(this)
-    this.inputChanged = this.inputChanged.bind(this)
+    this.state = { output: null }
+    this.solve()
+  }
+
+  public componentDidUpdate(prevProps: IDayProps) {
+    if (this.props.input !== prevProps.input || this.props.part2 !== prevProps.part2) {
+      this.solve()
+    }
   }
 
   public render() {
-    return (
-      <div className="row">
-        <div className="col">
-          <h3>Input</h3>
-          <textarea rows={10} onChange={this.inputChanged} value={this.state.input}/><br/>
-          <button onClick={this.solve}>Solve!</button>
-        </div>
-        <div className="col">
-          <h3>Result</h3>
-          {this.renderResult()}
-        </div>
-      </div>
-    )
-  }
-
-  public renderResult() {
     if (this.state.output == null) {
       return ''
     }
@@ -51,7 +39,7 @@ class Day1 extends React.Component<IDayProps, IState> {
 
   private solve() {
     this.setState({output: null})
-    const matches = this.state.input.match(NUMBERS)
+    const matches = this.props.input.match(NUMBERS)
     if (matches) {
       const numbers = [...matches].map((match: any) => parseInt(match, 10))
       const req = {
@@ -62,19 +50,10 @@ class Day1 extends React.Component<IDayProps, IState> {
         headers: {"Content-Type": "application/json"},
         method: "POST"
       }
-      fetch("/api/day1", req).then(r => this.setOutput(r))
+      fetch("/api/day1", req)
+        .then(r => r.json())
+        .then((output: IOutput) => this.setState({output}))
     }
-  }
-
-  private setOutput(r: any) {
-    if (r.status !== 200) {
-      return
-    }
-    r.json().then((output: IOutput) => this.setState({output}))
-  }
-
-  private inputChanged(ev: React.ChangeEvent<HTMLTextAreaElement>) {
-    this.setState({input: ev.target.value})
   }
 }
 
