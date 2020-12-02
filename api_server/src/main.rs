@@ -12,6 +12,7 @@ use rocket_contrib::json::Json;
 use serde::Serialize;
 
 mod day1;
+mod day2;
 
 #[get("/")]
 fn index() -> &'static str {
@@ -37,6 +38,11 @@ fn do_day1(input: Json<day1::Input>) -> Solution<day1::Output> {
     resp(day1::solve(input.into_inner()))
 }
 
+#[post("/day2", format = "json", data = "<input>")]
+fn do_day2(input: Json<day2::Input>) -> Solution<day2::Output> {
+    resp(day2::solve(input.into_inner()))
+}
+
 #[catch(503)]
 fn service_not_available(_req: &Request) -> &'static str {
     "Service is not available. (Is the database up?)"
@@ -45,6 +51,6 @@ fn service_not_available(_req: &Request) -> &'static str {
 fn main() {
     rocket::ignite()
         .register(catchers![service_not_available])
-        .mount("/api", routes![index, do_day1])
+        .mount("/api", routes![index, do_day1, do_day2])
         .launch();
 }

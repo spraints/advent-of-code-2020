@@ -2,6 +2,7 @@ import * as React from 'react';
 
 import Day from './Day';
 import Day1 from './Day1';
+import Day2 from './Day2';
 
 class App extends React.Component<{}, { apiMessage: string }> {
   constructor(props: object) {
@@ -32,6 +33,7 @@ class App extends React.Component<{}, { apiMessage: string }> {
           </h1>
         </div>
         <Day num="1"><Day1/></Day>
+        <Day num="2"><Day2/></Day>
         <h2>Status</h2>
         <p>
           {this.state.apiMessage}
