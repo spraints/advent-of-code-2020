@@ -1,10 +1,9 @@
 import * as React from 'react'
-import PartButtons from './PartButtons'
+import IDayProps from './DayProps'
 
 const NUMBERS = /\d+/g
 
 interface IState {
-  part2: boolean
   input: string
   output: IOutput | null
 }
@@ -14,13 +13,11 @@ interface IOutput {
   result: number
 }
 
-class Day1 extends React.Component<{}, IState> {
-  constructor(props: any) {
+class Day1 extends React.Component<IDayProps, IState> {
+  constructor(props: IDayProps) {
     super(props)
-    this.state = { input: '', output: null, part2: false }
+    this.state = { input: '', output: null }
     this.solve = this.solve.bind(this)
-    this.setPart1 = this.setPart1.bind(this)
-    this.setPart2 = this.setPart2.bind(this)
     this.inputChanged = this.inputChanged.bind(this)
   }
 
@@ -29,7 +26,6 @@ class Day1 extends React.Component<{}, IState> {
       <div className="row">
         <div className="col">
           <h3>Input</h3>
-          <PartButtons part2={this.state.part2} setPart1={this.setPart1} setPart2={this.setPart2}/>
           <textarea rows={10} onChange={this.inputChanged} value={this.state.input}/><br/>
           <button onClick={this.solve}>Solve!</button>
         </div>
@@ -61,7 +57,7 @@ class Day1 extends React.Component<{}, IState> {
       const req = {
         body: JSON.stringify({
           numbers,
-          part2: this.state.part2
+          part2: this.props.part2
         }),
         headers: {"Content-Type": "application/json"},
         method: "POST"
@@ -75,14 +71,6 @@ class Day1 extends React.Component<{}, IState> {
       return
     }
     r.json().then((output: IOutput) => this.setState({output}))
-  }
-
-  private setPart1() {
-    this.setState({part2: false})
-  }
-
-  private setPart2() {
-    this.setState({part2: true})
   }
 
   private inputChanged(ev: React.ChangeEvent<HTMLTextAreaElement>) {

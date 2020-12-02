@@ -1,11 +1,10 @@
 import * as React from 'react'
-import PartButtons from './PartButtons'
+import IDayProps from './DayProps'
 
 const PASSWORD_LINE = /(\d+)-(\d+) (.): (.*)/g
 const PASSWORD_LINE2 = /(\d+)-(\d+) (.): (.*)/
 
 interface IState {
-  part2: boolean
   input: string
   output: IOutput | null
 }
@@ -26,13 +25,11 @@ interface IPasswordPolicy {
   c: string
 }
 
-class Today extends React.Component<{}, IState> {
-  constructor(props: any) {
+class Today extends React.Component<IDayProps, IState> {
+  constructor(props: IDayProps) {
     super(props)
-    this.state = { part2: false, input: '', output: null }
+    this.state = { input: '', output: null }
     this.solve = this.solve.bind(this)
-    this.setPart1 = this.setPart1.bind(this)
-    this.setPart2 = this.setPart2.bind(this)
     this.inputChanged = this.inputChanged.bind(this)
   }
 
@@ -41,7 +38,6 @@ class Today extends React.Component<{}, IState> {
       <div className="row">
         <div className="col">
           <h3>Input</h3>
-          <PartButtons part2={this.state.part2} setPart1={this.setPart1} setPart2={this.setPart2}/>
           <textarea rows={10} onChange={this.inputChanged} value={this.state.input}/><br/>
           <button onClick={this.solve}>Solve!</button>
         </div>
@@ -93,7 +89,7 @@ class Today extends React.Component<{}, IState> {
       // console.log(passwords)
 
       const req = {
-        body: JSON.stringify({lines, part2: this.state.part2}),
+        body: JSON.stringify({lines, part2: this.props.part2}),
         headers: {"Content-Type": "application/json"},
         method: "POST"
       }
@@ -106,14 +102,6 @@ class Today extends React.Component<{}, IState> {
       return
     }
     r.json().then((output: IOutput) => this.setState({output}))
-  }
-
-  private setPart1() {
-    this.setState({part2: false})
-  }
-
-  private setPart2() {
-    this.setState({part2: true})
   }
 
   private inputChanged(ev: React.ChangeEvent<HTMLTextAreaElement>) {
