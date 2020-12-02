@@ -1,4 +1,5 @@
 import * as React from 'react'
+import PartButtons from './PartButtons'
 
 const PASSWORD_LINE = /(\d+)-(\d+) (.): (.*)/g
 const PASSWORD_LINE2 = /(\d+)-(\d+) (.): (.*)/
@@ -36,20 +37,11 @@ class Today extends React.Component<{}, IState> {
   }
 
   public render() {
-    const PartButtons = () => this.state.part2 ? (
-      <div>
-        <button onClick={this.setPart1}>Part 1</button> | <b>Part 2</b>
-      </div>
-    ) : (
-      <div>
-        <b>Part 1</b> | <button onClick={this.setPart2}>Part 2</button>
-      </div>
-    )
     return (
       <div className="row">
         <div className="col">
           <h3>Input</h3>
-          <PartButtons/>
+          <PartButtons part2={this.state.part2} setPart1={this.setPart1} setPart2={this.setPart2}/>
           <textarea rows={10} onChange={this.inputChanged} value={this.state.input}/><br/>
           <button onClick={this.solve}>Solve!</button>
         </div>
