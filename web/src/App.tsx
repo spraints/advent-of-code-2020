@@ -32,8 +32,10 @@ class App extends React.Component<{}, { apiMessage: string }> {
             Matt's Advent of Code 2020
           </h1>
         </div>
-        <Day num="1"><Day1/></Day>
+
         <Day num="2"><Day2/></Day>
+        <Day num="1"><Day1/></Day>
+
         <h2>Status</h2>
         <p>
           {this.state.apiMessage}

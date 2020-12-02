@@ -1,12 +1,27 @@
 import * as React from 'react'
 
+const PASSWORD_LINE = /(\d+)-(\d+) (.): (.*)/g
+const PASSWORD_LINE2 = /(\d+)-(\d+) (.): (.*)/
+
 interface IState {
   input: string
   output: IOutput | null
 }
 
 interface IOutput {
-  todo: string
+  valid: IPasswordLine[]
+  invalid: IPasswordLine[]
+}
+
+interface IPasswordLine {
+  policy: IPasswordPolicy
+  password: string
+}
+
+interface IPasswordPolicy {
+  min: number
+  max: number
+  c: string
 }
 
 class Today extends React.Component<{}, IState> {
@@ -37,21 +52,48 @@ class Today extends React.Component<{}, IState> {
     if (this.state.output == null) {
       return ''
     }
+    const Res = (props: any) => (
+      <div>
+        <i>{props.label}</i>
+        <ul>
+          {props.items.map((line: IPasswordLine) => (<li>{line.policy.min}-{line.policy.max} {line.policy.c}: {line.password}</li>))}
+        </ul>
+      </div>
+    )
     return (
       <p>
-        TODO!
+        <b>{this.state.output.valid.length}</b>
+        <Res label="Valid" items={this.state.output.valid}/>
+        <Res label="Not valid" items={this.state.output.invalid}/>
       </p>
     )
   }
 
   private solve() {
     this.setState({output: null})
-    const req = {
-      body: JSON.stringify({}),
-      headers: {"Content-Type": "application/json"},
-      method: "POST"
+    const matches = this.state.input.match(PASSWORD_LINE)
+    if (matches) {
+      const lines = [...matches].map((match: string) => {
+        const m = match.match(PASSWORD_LINE2)
+        if (!m) {
+          return {}
+        }
+        return {
+          password: m[4],
+          policy: {min: parseInt(m[1], 10), max: parseInt(m[2], 10), c: m[3]}
+        }
+      })
+
+      // tslint:disable:no-console
+      // console.log(passwords)
+
+      const req = {
+        body: JSON.stringify({lines}),
+        headers: {"Content-Type": "application/json"},
+        method: "POST"
+      }
+      fetch("/api/day2", req).then(r => this.setOutput(r))
     }
-    fetch("/api/day2", req).then(r => this.setOutput(r))
   }
 
   private setOutput(r: any) {
