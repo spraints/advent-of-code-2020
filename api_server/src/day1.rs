@@ -49,11 +49,11 @@ mod tests {
             numbers: vec![1721, 979, 366, 299, 675, 1456],
         };
         assert_eq!(
-            Output {
+            Ok(Output {
                 a: 299,
                 b: 1721,
                 result: 514579
-            },
+            }),
             solve(input)
         );
     }
