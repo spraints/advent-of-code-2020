@@ -12,26 +12,26 @@ pub struct Output {
     result: u64,
 }
 
-pub fn solve(mut input: Input) -> Output {
+pub fn solve(mut input: Input) -> Result<Output, String> {
     input.numbers.sort();
     let n = input.numbers.len();
-    let (a, b) = find2020(input.numbers, 0, n - 1);
-    Output {
+    let (a, b) = find2020(input.numbers, 0, n - 1)?;
+    Ok(Output {
         a,
         b,
         result: a * b,
-    }
+    })
 }
 
-pub fn find2020(input: Vec<u64>, i1: usize, i2: usize) -> (u64, u64) {
+pub fn find2020(input: Vec<u64>, i1: usize, i2: usize) -> Result<(u64, u64), String> {
     if i1 >= i2 {
-        panic!("not found!");
+        return Err("no valid pair was found!".to_string());
     }
     let a = input[i1];
     let b = input[i2];
     let sum = a + b;
     if sum == 2020 {
-        (a, b)
+        Ok((a, b))
     } else if sum < 2020 {
         find2020(input, i1 + 1, i2)
     } else {

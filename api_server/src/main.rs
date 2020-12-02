@@ -7,7 +7,9 @@ extern crate rocket_contrib;
 extern crate serde;
 
 use rocket::request::Request;
+use rocket::response::status::BadRequest;
 use rocket_contrib::json::Json;
+use serde::Serialize;
 
 mod day1;
 
@@ -16,9 +18,23 @@ fn index() -> &'static str {
     "Hello, from Rust!"
 }
 
+#[derive(Serialize, Debug)]
+struct SolutionError {
+    error: String,
+}
+
+type Solution<T> = Result<Json<T>, BadRequest<Json<SolutionError>>>;
+
+fn resp<T>(solution: Result<T, String>) -> Solution<T> {
+    match solution {
+        Ok(x) => Ok(Json(x)),
+        Err(error) => Err(BadRequest(Some(Json(SolutionError { error })))),
+    }
+}
+
 #[post("/day1", format = "json", data = "<input>")]
-fn do_day1(input: Json<day1::Input>) -> Json<day1::Output> {
-    Json(day1::solve(input.into_inner()))
+fn do_day1(input: Json<day1::Input>) -> Solution<day1::Output> {
+    resp(day1::solve(input.into_inner()))
 }
 
 #[catch(503)]
