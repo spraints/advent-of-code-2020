@@ -21,7 +21,7 @@ pub fn solve(input: Input) -> Result<Output, String> {
 
 fn solve2(numbers: &Vec<u64>, min_index: usize, sum: u64, levels: u8) -> Option<Output> {
     let max_index = numbers.len() - (levels as usize);
-    for i in (min_index..max_index) {
+    for i in min_index..max_index {
         let n = numbers[i];
         let sum = sum + n;
         if levels == 0 {
