@@ -13,114 +13,38 @@ pub struct Output {
 }
 
 pub fn solve(input: Input) -> Result<Output, String> {
-    if input.part2 {
-        for (a, b, c) in each3(input.numbers) {
-            if a + b + c == 2020 {
-                return Ok(Output {
-                    numbers: vec![a, b, c],
-                    result: a * b * c,
+    match solve2(&input.numbers, 0, 0, if input.part2 { 2 } else { 1 }) {
+        Some(x) => Ok(x),
+        None => Err("no set of three numbers adds up to 2020".to_string()),
+    }
+}
+
+fn solve2(numbers: &Vec<u64>, min_index: usize, sum: u64, levels: u8) -> Option<Output> {
+    let max_index = numbers.len() - (levels as usize);
+    for i in (min_index..max_index) {
+        let n = numbers[i];
+        let sum = sum + n;
+        if levels == 0 {
+            if sum == 2020 {
+                return Some(Output {
+                    numbers: vec![n],
+                    result: n,
                 });
             }
-        }
-    } else {
-        for (a, b) in each2(input.numbers) {
-            if a + b == 2020 {
-                return Ok(Output {
-                    numbers: vec![a, b],
-                    result: a * b,
-                });
+        } else if sum < 2020 {
+            if let Some(x) = solve2(numbers, i + 1, sum, levels - 1) {
+                return Some(x.and(n));
             }
         }
     }
-    Err("no set of three numbers adds up to 2020".to_string())
+    None
 }
 
-fn each3(numbers: Vec<u64>) -> Each3 {
-    Each3 {
-        numbers,
-        i: 0,
-        j: 0,
-        k: 0,
-    }
-}
-
-struct Each3 {
-    numbers: Vec<u64>,
-    i: usize,
-    j: usize,
-    k: usize,
-}
-
-impl Iterator for Each3 {
-    type Item = (u64, u64, u64);
-
-    fn next(&mut self) -> Option<Self::Item> {
-        if self.numbers.len() < 3 {
-            return None;
-        }
-        if self.k == 0 {
-            // Init
-            self.i = 0;
-            self.j = 1;
-            self.k = 2;
-        } else {
-            if self.k < self.numbers.len() - 1 {
-                self.k += 1
-            } else if self.j < self.numbers.len() - 2 {
-                self.j += 1;
-                self.k = self.j + 1;
-            } else if self.i < self.numbers.len() - 3 {
-                self.i += 1;
-                self.j = self.i + 1;
-                self.k = self.j + 1;
-            } else {
-                return None;
-            }
-        }
-        Some((
-            self.numbers[self.i],
-            self.numbers[self.j],
-            self.numbers[self.k],
-        ))
-    }
-}
-
-fn each2(numbers: Vec<u64>) -> Each2 {
-    Each2 {
-        numbers,
-        i: 0,
-        j: 0,
-    }
-}
-
-struct Each2 {
-    numbers: Vec<u64>,
-    i: usize,
-    j: usize,
-}
-
-impl Iterator for Each2 {
-    type Item = (u64, u64);
-
-    fn next(&mut self) -> Option<Self::Item> {
-        if self.numbers.len() < 2 {
-            return None;
-        }
-        if self.j == 0 {
-            // Init
-            self.i = 0;
-            self.j = 1;
-        } else {
-            if self.j < self.numbers.len() - 1 {
-                self.j += 1;
-            } else if self.i < self.numbers.len() - 2 {
-                self.i += 1;
-                self.j = self.i + 1;
-            } else {
-                return None;
-            }
-        }
-        Some((self.numbers[self.i], self.numbers[self.j]))
+impl Output {
+    fn and(mut self, n: u64) -> Self {
+        self.numbers.insert(0, n);
+        self.result *= n;
+        self
     }
 }
 
