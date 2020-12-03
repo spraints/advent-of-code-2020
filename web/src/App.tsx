@@ -3,6 +3,7 @@ import * as React from 'react';
 import Day from './Day';
 import Day1 from './Day1';
 import Day2 from './Day2';
+import Day3 from './Day3';
 
 class App extends React.Component<{}, { apiMessage: string }> {
   constructor(props: object) {
@@ -32,6 +33,8 @@ class App extends React.Component<{}, { apiMessage: string }> {
             Matt's Advent of Code 2020
           </h1>
         </div>
+
+        <Day3/>
 
         <Day num="2">{(isPart2: boolean, input: string) =>
           <Day2 part2={isPart2} input={input}/>}</Day>
