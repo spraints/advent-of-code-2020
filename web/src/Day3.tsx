@@ -102,7 +102,7 @@ class DayNG extends React.Component<IProps, IState> {
 ///
 
 function parseDay3Input(input: string): any {
-  return 1
+  return input
 }
 
 interface IOutputProps {
@@ -111,9 +111,10 @@ interface IOutputProps {
 
 function Day3Output({output}: IOutputProps) {
   return (
-    <pre>
-      {JSON.stringify(output)}
-    </pre>
+    <div>
+      Collisions: <b>{output.collisions}</b><br/>
+      <pre>{output.rendered}</pre>
+    </div>
   )
 }
 

@@ -6,6 +6,9 @@ extern crate rocket;
 extern crate rocket_contrib;
 extern crate serde;
 
+#[cfg(test)]
+extern crate pretty_assertions;
+
 use rocket::request::Request;
 use rocket::response::status::BadRequest;
 use rocket_contrib::json::Json;
