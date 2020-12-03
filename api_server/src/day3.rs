@@ -23,9 +23,9 @@ pub struct RunResult {
 enum Space {
     Empty,
     Tree,
-    Path,
-    Collision(i64),
 }
+
+type Path = Vec<(usize, usize)>;
 
 type Line = (Vec<Space>, bool);
 type Area = Vec<Line>;
@@ -39,52 +39,45 @@ pub fn solve(input: Input) -> Result<Output, String> {
     })
 }
 
-fn do_run(mut area: Area, slope: (usize, usize)) -> RunResult {
+fn do_run(area: Area, slope: (usize, usize)) -> RunResult {
     let (mut x, mut y) = slope;
+    let mut path = Path::new();
+    let mut collisions = 0;
     while y < area.len() {
-        if let Some((line, _)) = area.get_mut(y) {
+        if let Some((line, _)) = area.get(y) {
             let len = line.len();
-            if let Some(space) = (*line).get_mut(x % len) {
-                *space = match *space {
-                    Space::Empty => Space::Path,
-                    Space::Tree => Space::Collision(1),
-                    Space::Path => Space::Path,
-                    Space::Collision(n) => Space::Collision(n + 1),
+            if let Some(space) = line.get(x % len) {
+                if let Space::Tree = space {
+                    collisions += 1;
                 }
+                path.push((x, y));
             }
         }
         x = x + slope.0;
         y = y + slope.1;
     }
     RunResult {
-        slope: (3, 1),
-        collisions: count_collisions(&area),
-        rendered: render(&area),
+        slope,
+        collisions,
+        rendered: render(&area, &path),
     }
 }
 
-fn count_collisions(area: &Area) -> i64 {
-    let mut count = 0;
-    for (line, _) in area {
-        for space in line {
-            if let Space::Collision(n) = space {
-                count += n;
-            }
-        }
-    }
-    count
-}
-
-fn render(area: &Area) -> String {
+fn render(area: &Area, path: &Path) -> String {
     let mut res = String::with_capacity(area.len() * (area[0].0.len() + 7));
-    for line in area {
+    for (y, line) in area.iter().enumerate() {
         let (spaces, has_arrow) = line;
-        for space in spaces {
-            res.push(match space {
-                Space::Empty => '.',
-                Space::Tree => '#',
-                Space::Path => 'O',
-                Space::Collision(_) => 'X',
+        for (x, space) in spaces.iter().enumerate() {
+            res.push(if path_includes(path, &(x, y)) {
+                match space {
+                    Space::Empty => 'O',
+                    Space::Tree => 'X',
+                }
+            } else {
+                match space {
+                    Space::Empty => '.',
+                    Space::Tree => '#',
+                }
             });
         }
         if *has_arrow {
@@ -93,6 +86,15 @@ fn render(area: &Area) -> String {
         res.push('\n');
     }
     res
+}
+
+fn path_includes(path: &Path, coords: &(usize, usize)) -> bool {
+    for step in path {
+        if step == coords {
+            return true;
+        }
+    }
+    return false;
 }
 
 fn parse(s: &String) -> Result<Area, String> {
