@@ -71,24 +71,40 @@ class DayNG extends React.Component<IProps, IState> {
 
   private setPart1() {
     this.setState({part2: false})
+    this.solve(this.state.input)
   }
 
   private setPart2() {
     this.setState({part2: true})
+    this.solve(this.state.input)
   }
 
-  private async inputChanged(ev: React.ChangeEvent<HTMLTextAreaElement>) {
+  private inputChanged(ev: React.ChangeEvent<HTMLTextAreaElement>) {
+    const input = ev.target.value
+    this.setState({input})
+    this.solve(input)
+  }
+
+  private async solve(inputStr: string) {
+    if (inputStr === '') {
+      this.setState({output: null})
+      return
+    }
+
     try {
-      const input = ev.target.value
-      this.setState({input})
+      const input = this.props.parseInput(inputStr)
       const resp = await fetch(this.props.url, {
-        body: JSON.stringify({input: this.props.parseInput(input), part2: this.state.part2}),
+        body: JSON.stringify({input, part2: this.state.part2}),
         headers: {"Content-Type": "application/json"},
         method: "POST"
       })
       if (resp.status !== 200) {
-        const body = await resp.text()
-        this.setState({error: `${resp.status}: ${body}`})
+        try {
+          const body = await resp.text()
+          this.setState({error: `${resp.status}: ${body}`})
+        } catch {
+          this.setState({error: `${resp.status}!`})
+        }
         return
       }
       const output = await resp.json()
@@ -106,14 +122,34 @@ function parseDay3Input(input: string): any {
 }
 
 interface IOutputProps {
-  output: any
+  output: IOutput
+}
+
+interface IOutput {
+  product: number
+  runs: IRun[]
+}
+
+interface IRun {
+  slope: number[]
+  collisions: number
+  rendered: string
 }
 
 function Day3Output({output}: IOutputProps) {
   return (
     <div>
-      Collisions: <b>{output.collisions}</b><br/>
-      <pre>{output.rendered}</pre>
+      <p>Result: <b>{output.product}</b></p>
+      {output.runs.map(renderRun)}
+    </div>
+  )
+}
+
+function renderRun(run: IRun) {
+  return (
+    <div>
+      <p>Slope: ({run.slope.join(", ")})</p>
+      <pre>{run.rendered}</pre>
     </div>
   )
 }

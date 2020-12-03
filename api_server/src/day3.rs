@@ -6,8 +6,16 @@ pub struct Input {
     input: String,
 }
 
-#[derive(Serialize, Debug, PartialEq)]
+#[derive(Serialize)]
+#[serde(tag = "type")]
 pub struct Output {
+    product: i64,
+    runs: Vec<RunResult>,
+}
+
+#[derive(Serialize)]
+pub struct RunResult {
+    slope: (usize, usize),
     collisions: i64,
     rendered: String,
 }
@@ -24,15 +32,15 @@ type Area = Vec<Line>;
 
 pub fn solve(input: Input) -> Result<Output, String> {
     let area = parse(&input.input)?;
-    let area = solve_part1(area);
+    let result = do_run(area, (3, 1));
     Ok(Output {
-        collisions: count_collisions(&area),
-        rendered: render(&area),
+        product: result.collisions,
+        runs: vec![result],
     })
 }
 
-fn solve_part1(mut area: Area) -> Area {
-    let (mut x, mut y) = (3, 1);
+fn do_run(mut area: Area, slope: (usize, usize)) -> RunResult {
+    let (mut x, mut y) = slope;
     while y < area.len() {
         if let Some((line, _)) = area.get_mut(y) {
             let len = line.len();
@@ -45,10 +53,14 @@ fn solve_part1(mut area: Area) -> Area {
                 }
             }
         }
-        x = x + 3;
-        y = y + 1;
+        x = x + slope.0;
+        y = y + slope.1;
     }
-    area
+    RunResult {
+        slope: (3, 1),
+        collisions: count_collisions(&area),
+        rendered: render(&area),
+    }
 }
 
 fn count_collisions(area: &Area) -> i64 {
@@ -105,11 +117,9 @@ mod tests {
     use super::*;
     use pretty_assertions::assert_eq;
 
-    fn part1(input: &'static str) -> Input {
-        Input {
-            part2: false,
-            input: input.to_string(),
-        }
+    fn mk_input(part2: bool, input: &'static str) -> Input {
+        let input = input.to_string();
+        Input { part2, input }
     }
 
     #[test]
@@ -141,9 +151,10 @@ mod tests {
             .#..#...#.#.#..#...#.#.#..#...X.#.#..#...#.#.#..#...#.#.#..#...#.#  --->\n\
             ";
 
-        let output = solve(part1(input)).unwrap();
+        let output = solve(mk_input(false, input)).unwrap();
 
-        assert_eq!(expected_output.to_string(), output.rendered);
-        assert_eq!(7, output.collisions);
+        assert_eq!(expected_output.to_string(), output.runs[0].rendered);
+        assert_eq!(7, output.product);
+    }
     }
 }
