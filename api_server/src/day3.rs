@@ -32,14 +32,20 @@ type Area = Vec<Line>;
 
 pub fn solve(input: Input) -> Result<Output, String> {
     let area = parse(&input.input)?;
-    let result = do_run(area, (3, 1));
-    Ok(Output {
-        product: result.collisions,
-        runs: vec![result],
-    })
+    let slopes = if input.part2 {
+        vec![(1, 1), (3, 1), (5, 1), (7, 1), (1, 2)]
+    } else {
+        vec![(3, 1)]
+    };
+    let runs: Vec<RunResult> = slopes
+        .into_iter()
+        .map(|slope| do_run(&area, slope))
+        .collect();
+    let product = runs.iter().fold(1, |prod, res| prod * res.collisions);
+    Ok(Output { product, runs })
 }
 
-fn do_run(area: Area, slope: (usize, usize)) -> RunResult {
+fn do_run(area: &Area, slope: (usize, usize)) -> RunResult {
     let (mut x, mut y) = slope;
     let mut path = Path::new();
     let mut collisions = 0;
@@ -50,7 +56,7 @@ fn do_run(area: Area, slope: (usize, usize)) -> RunResult {
                 if let Space::Tree = space {
                     collisions += 1;
                 }
-                path.push((x, y));
+                path.push((x % len, y));
             }
         }
         x = x + slope.0;
@@ -158,5 +164,25 @@ mod tests {
         assert_eq!(expected_output.to_string(), output.runs[0].rendered);
         assert_eq!(7, output.product);
     }
+
+    #[test]
+    fn test_part2() {
+        let input = "\
+            ..##.........##.........##.........##.........##.........##.......  --->\n\
+            #...#...#..#...#...#..#...#...#..#...#...#..#...#...#..#...#...#..\n\
+            .#....#..#..#....#..#..#....#..#..#....#..#..#....#..#..#....#..#.\n\
+            ..#.#...#.#..#.#...#.#..#.#...#.#..#.#...#.#..#.#...#.#..#.#...#.#\n\
+            .#...##..#..#...##..#..#...##..#..#...##..#..#...##..#..#...##..#.\n\
+            ..#.##.......#.##.......#.##.......#.##.......#.##.......#.##.....  --->\n\
+            .#.#.#....#.#.#.#....#.#.#.#....#.#.#.#....#.#.#.#....#.#.#.#....#\n\
+            .#........#.#........#.#........#.#........#.#........#.#........#\n\
+            #.##...#...#.##...#...#.##...#...#.##...#...#.##...#...#.##...#...\n\
+            #...##....##...##....##...##....##...##....##...##....##...##....#\n\
+            .#..#...#.#.#..#...#.#.#..#...#.#.#..#...#.#.#..#...#.#.#..#...#.#  --->\n\
+            ";
+
+        let output = solve(mk_input(true, input)).unwrap();
+
+        assert_eq!(336, output.product);
     }
 }

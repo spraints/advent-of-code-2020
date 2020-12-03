@@ -71,30 +71,30 @@ class DayNG extends React.Component<IProps, IState> {
 
   private setPart1() {
     this.setState({part2: false})
-    this.solve(this.state.input)
+    this.solve({input: this.state.input, part2: false})
   }
 
   private setPart2() {
     this.setState({part2: true})
-    this.solve(this.state.input)
+    this.solve({input: this.state.input, part2: true})
   }
 
   private inputChanged(ev: React.ChangeEvent<HTMLTextAreaElement>) {
     const input = ev.target.value
     this.setState({input})
-    this.solve(input)
+    this.solve({input, part2: this.state.part2})
   }
 
-  private async solve(inputStr: string) {
-    if (inputStr === '') {
+  private async solve(arg: {input: string, part2: boolean}) {
+    const {input, part2} = arg
+    if (input === '') {
       this.setState({output: null})
       return
     }
 
     try {
-      const input = this.props.parseInput(inputStr)
       const resp = await fetch(this.props.url, {
-        body: JSON.stringify({input, part2: this.state.part2}),
+        body: JSON.stringify({input: this.props.parseInput(input), part2}),
         headers: {"Content-Type": "application/json"},
         method: "POST"
       })
