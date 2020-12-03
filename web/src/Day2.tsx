@@ -58,7 +58,7 @@ class Today extends React.Component<IDayProps, IState> {
     )
   }
 
-  private solve() {
+  private async solve() {
     this.setState({output: null})
     const matches = this.props.input.match(PASSWORD_LINE)
     if (matches) {
@@ -81,9 +81,11 @@ class Today extends React.Component<IDayProps, IState> {
         headers: {"Content-Type": "application/json"},
         method: "POST"
       }
-      fetch("/api/day2", req)
-        .then(r => r.json())
-        .then((output: IOutput) => this.setState({output}))
+      const res = await fetch("/api/day2", req)
+      if (res.status === 200) {
+        const output = await res.json() as IOutput
+        this.setState({output})
+      }
     }
   }
 }
