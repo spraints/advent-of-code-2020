@@ -18,7 +18,13 @@ services:
     volumes:
       - "./api_server:/usr/src/app"
       - "api_server_cargo:/usr/local/cargo"
-    command: "cargo watch -x test -x run"
+    command:
+      - "cargo"
+      - "watch"
+      - "-x"
+      - "test --lib"
+      - "-x"
+      - "run"
 
 volumes:
   api_server_cargo:

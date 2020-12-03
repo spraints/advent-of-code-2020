@@ -6,17 +6,10 @@ extern crate rocket;
 extern crate rocket_contrib;
 extern crate serde;
 
-#[cfg(test)]
-extern crate pretty_assertions;
-
 use rocket::request::Request;
 use rocket::response::status::BadRequest;
 use rocket_contrib::json::Json;
 use serde::Serialize;
-
-mod day1;
-mod day2;
-mod day3;
 
 #[get("/")]
 fn index() -> &'static str {
@@ -38,18 +31,18 @@ fn resp<T>(solution: Result<T, String>) -> Solution<T> {
 }
 
 #[post("/day1", format = "json", data = "<input>")]
-fn do_day1(input: Json<day1::Input>) -> Solution<day1::Output> {
-    resp(day1::solve(input.into_inner()))
+fn do_day1(input: Json<api_server::day1::Input>) -> Solution<api_server::day1::Output> {
+    resp(api_server::day1::solve(input.into_inner()))
 }
 
 #[post("/day2", format = "json", data = "<input>")]
-fn do_day2(input: Json<day2::Input>) -> Solution<day2::Output> {
-    resp(day2::solve(input.into_inner()))
+fn do_day2(input: Json<api_server::day2::Input>) -> Solution<api_server::day2::Output> {
+    resp(api_server::day2::solve(input.into_inner()))
 }
 
 #[post("/day3", format = "json", data = "<input>")]
-fn do_day3(input: Json<day3::Input>) -> Solution<day3::Output> {
-    resp(day3::solve(input.into_inner()))
+fn do_day3(input: Json<api_server::day3::Input>) -> Solution<api_server::day3::Output> {
+    resp(api_server::day3::solve(input.into_inner()))
 }
 
 #[catch(503)]
