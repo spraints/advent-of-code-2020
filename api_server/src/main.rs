@@ -45,6 +45,11 @@ fn do_day3(input: Json<api_server::day3::Input>) -> Solution<api_server::day3::O
     resp(api_server::day3::solve(input.into_inner()))
 }
 
+#[post("/day4", format = "json", data = "<input>")]
+fn do_day4(input: Json<api_server::day4::Input>) -> Solution<api_server::day4::Output> {
+    resp(api_server::day4::solve(input.into_inner()))
+}
+
 #[catch(503)]
 fn service_not_available(_req: &Request) -> &'static str {
     "Service is not available. (Is the database up?)"

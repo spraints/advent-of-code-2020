@@ -4,6 +4,7 @@ import Day from './Day';
 import Day1 from './Day1';
 import Day2 from './Day2';
 import Day3 from './Day3';
+import Day4 from './Day4';
 
 class App extends React.Component<{}, { apiMessage: string }> {
   constructor(props: object) {
@@ -33,6 +34,8 @@ class App extends React.Component<{}, { apiMessage: string }> {
             Matt's Advent of Code 2020
           </h1>
         </div>
+
+        <Day4/>
 
         <Day3/>
 

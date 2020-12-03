@@ -7,7 +7,6 @@ pub struct Input {
 }
 
 #[derive(Serialize)]
-#[serde(tag = "type")]
 pub struct Output {
     product: i64,
     runs: Vec<RunResult>,
