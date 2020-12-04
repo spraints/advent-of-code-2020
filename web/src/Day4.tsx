@@ -127,7 +127,7 @@ interface IOutputProps {
 
 interface IOutput {
   valid: number
-  scan_result: string[]
+  failures: string[]
 }
 
 function Output({output}: IOutputProps) {
@@ -136,7 +136,7 @@ function Output({output}: IOutputProps) {
       <p><b>{output.valid}</b></p>
       <p>problems:</p>
       <ul>
-        {output.scan_result.map(res => (<li><code>res}</code></li>))}
+        {output.failures.map(res => (<li><pre>{res}</pre></li>))}
       </ul>
     </div>
   )

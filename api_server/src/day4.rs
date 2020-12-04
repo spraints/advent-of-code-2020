@@ -109,8 +109,15 @@ impl Checker for FieldContentChecker {
         val.all(|c| c.is_digit(16) && !c.is_uppercase())
     }
 
+    // (Eye Color) - exactly one of: amb blu brn gry grn hzl oth.
     fn is_valid_ecl(&self, ecl: &str) -> bool {
-        ecl == "amb" || ecl == "blu" || ecl == "gry" || ecl == "grn" || ecl == "hzl" || ecl == "oth"
+        ecl == "amb"
+            || ecl == "blu"
+            || ecl == "brn"
+            || ecl == "gry"
+            || ecl == "grn"
+            || ecl == "hzl"
+            || ecl == "oth"
     }
 
     fn is_valid_pid(&self, val: &str) -> bool {
@@ -184,11 +191,20 @@ where
         if byr && iyr && eyr && hgt && hcl && ecl && pid {
             Ok(())
         } else {
-            Err(format!(
-                "{}\nbyr:{} iyr:{} eyr:{} hgt:{} hcl:{} ecl:{} pid:{}",
-                passport, byr, iyr, eyr, hgt, hcl, ecl, pid
-            )
-            .to_string())
+            let bad_fields = vec![
+                ("byr", byr),
+                ("iyr", iyr),
+                ("eyr", eyr),
+                ("hgt", hgt),
+                ("hcl", hcl),
+                ("ecl", ecl),
+                ("pid", pid),
+            ];
+            let bad_fields: Vec<&str> = bad_fields
+                .into_iter()
+                .filter_map(|(f, ok)| if ok { None } else { Some(f) })
+                .collect();
+            Err(format!("{}\nBAD: {}\n", passport, bad_fields.join(" ")).to_string())
         }
     }
 }
