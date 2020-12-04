@@ -58,6 +58,6 @@ fn service_not_available(_req: &Request) -> &'static str {
 fn main() {
     rocket::ignite()
         .register(catchers![service_not_available])
-        .mount("/api", routes![index, do_day1, do_day2, do_day3])
+        .mount("/api", routes![index, do_day1, do_day2, do_day3, do_day4])
         .launch();
 }
