@@ -14,60 +14,136 @@ pub struct Output {
 
 type P = Result<(), String>;
 
-trait Validator {
-    fn check(&self, passport: &str) -> P;
-}
-
 pub fn solve(input: Input) -> Result<Output, String> {
     let part2 = input.part2;
     let input = input.input;
-    let scan_result = if !part2 {
-        let validator = RequiredFieldValidator {
-            required_fields: vec!["byr", "iyr", "eyr", "hgt", "hcl", "ecl", "pid"],
-        };
-        scan(input, validator)
+    let scan_result = if part2 {
+        scan(
+            input,
+            Validator {
+                checker: FieldContentChecker {},
+            },
+        )
     } else {
-        scan(input, DetailedValidator {})
+        scan(
+            input,
+            Validator {
+                checker: FieldPresenceChecker {},
+            },
+        )
     };
     let valid = scan_result.iter().filter(|x| x.is_ok()).count();
     Ok(Output { valid, scan_result })
 }
 
-fn scan(input: String, validator: impl Validator) -> Vec<P> {
+fn scan(input: String, validator: Validator<impl Checker>) -> Vec<P> {
     input
         .split("\n\n")
         .map(|passport| validator.check(passport))
         .collect()
 }
 
-struct RequiredFieldValidator {
-    required_fields: Vec<&'static str>,
+struct Validator<T> {
+    checker: T,
 }
 
-impl Validator for RequiredFieldValidator {
-    fn check(&self, passport: &str) -> P {
-        let fields: Vec<&str> = passport
-            .split(char::is_whitespace)
-            .filter_map(|entry| entry.split(':').next())
-            .collect();
-        let missing_fields: Vec<&&str> = self
-            .required_fields
-            .iter()
-            .filter(|rf| !fields.contains(rf))
-            .collect();
-        if missing_fields.len() == 0 {
-            Ok(())
-        } else {
-            Err(format!("missing: {:?}", missing_fields))
+trait Checker {
+    fn is_valid_yr(&self, val: &str, min: u16, max: u16) -> bool;
+    fn is_valid_hgt(&self, val: &str) -> bool;
+    fn is_valid_hcl(&self, val: &str) -> bool;
+    fn is_valid_ecl(&self, val: &str) -> bool;
+    fn is_valid_pid(&self, val: &str) -> bool;
+}
+
+struct FieldContentChecker {}
+
+impl Checker for FieldContentChecker {
+    fn is_valid_yr(&self, val: &str, min: u16, max: u16) -> bool {
+        match val.parse::<u16>() {
+            Ok(yr) => yr >= min && yr <= max,
+            _ => false,
         }
+    }
+
+    // (Height) - a number followed by either cm or in:
+    // If cm, the number must be at least 150 and at most 193.
+    // If in, the number must be at least 59 and at most 76.
+    fn is_valid_hgt(&self, val: &str) -> bool {
+        let mut hgt = 0;
+        let mut val = val.chars();
+        loop {
+            match val.next() {
+                None => return false,
+                Some(c) => match c {
+                    'c' => match val.next() {
+                        Some('m') => match val.next() {
+                            None => return hgt >= 150 && hgt <= 193,
+                            _ => return false,
+                        },
+                        _ => return false,
+                    },
+                    'i' => match val.next() {
+                        Some('n') => match val.next() {
+                            None => return hgt >= 59 && hgt <= 76,
+                            _ => return false,
+                        },
+                        _ => return false,
+                    },
+                    _ => match c.to_digit(10) {
+                        Some(n) => hgt = hgt * 10 + n,
+                        None => return false,
+                    },
+                },
+            }
+        }
+    }
+
+    fn is_valid_hcl(&self, val: &str) -> bool {
+        let mut val = val.chars();
+        match val.next() {
+            Some('#') => (),
+            _ => return false,
+        };
+        val.all(|c| c.is_digit(16) && !c.is_uppercase())
+    }
+
+    fn is_valid_ecl(&self, ecl: &str) -> bool {
+        ecl == "amb" || ecl == "blu" || ecl == "gry" || ecl == "grn" || ecl == "hzl" || ecl == "oth"
+    }
+
+    fn is_valid_pid(&self, val: &str) -> bool {
+        val.len() == 9 && val.chars().all(|c| c.is_digit(10))
     }
 }
 
-struct DetailedValidator {
-    //validate_content: bool,
+struct FieldPresenceChecker {}
+
+impl Checker for FieldPresenceChecker {
+    fn is_valid_yr(&self, _: &str, _: u16, _: u16) -> bool {
+        true
+    }
+
+    fn is_valid_hgt(&self, _: &str) -> bool {
+        true
+    }
+
+    fn is_valid_hcl(&self, _: &str) -> bool {
+        true
+    }
+
+    fn is_valid_ecl(&self, _: &str) -> bool {
+        true
+    }
+
+    fn is_valid_pid(&self, _: &str) -> bool {
+        true
+    }
 }
 
-impl Validator for DetailedValidator {
+impl<T> Validator<T>
+where
+    T: Checker,
+{
     fn check(&self, passport: &str) -> P {
         let mut byr = false; // (Birth Year) - four digits; at least 1920 and at most 2002.
         let mut iyr = false; // (Issue Year) - four digits; at least 2010 and at most 2020.
@@ -78,18 +154,26 @@ impl Validator for DetailedValidator {
         let mut hcl = false; // (Hair Color) - a # followed by exactly six characters 0-9 or a-f.
         let mut ecl = false; // (Eye Color) - exactly one of: amb blu brn gry grn hzl oth.
         let mut pid = false; // (Passport ID) - a nine-digit number, including leading zeroes.
-        //let mut cid = false; // (Country ID) - ignored, missing or not.
+                             //let mut cid = false; // (Country ID) - ignored, missing or not.
 
         for field in passport.split(char::is_whitespace) {
             let mut parts = field.split(':');
-            match parts.next() {
-                Some("byr") => byr = true,
-                Some("iyr") => iyr = true,
-                Some("eyr") => eyr = true,
-                Some("hgt") => hgt = true,
-                Some("hcl") => hcl = true,
-                Some("ecl") => ecl = true,
-                Some("pid") => pid = true,
+            let field_name = parts.next();
+            let field_value = parts.next();
+            match (field_name, field_value) {
+                (Some("byr"), Some(field_value)) => {
+                    byr = self.checker.is_valid_yr(field_value, 1920, 2002)
+                }
+                (Some("iyr"), Some(field_value)) => {
+                    iyr = self.checker.is_valid_yr(field_value, 2010, 2020)
+                }
+                (Some("eyr"), Some(field_value)) => {
+                    eyr = self.checker.is_valid_yr(field_value, 2020, 2030)
+                }
+                (Some("hgt"), Some(field_value)) => hgt = self.checker.is_valid_hgt(field_value),
+                (Some("hcl"), Some(field_value)) => hcl = self.checker.is_valid_hcl(field_value),
+                (Some("ecl"), Some(field_value)) => ecl = self.checker.is_valid_ecl(field_value),
+                (Some("pid"), Some(field_value)) => pid = self.checker.is_valid_pid(field_value),
                 //Some("cid") => cid = true,
                 _ => (),
             }
@@ -98,8 +182,11 @@ impl Validator for DetailedValidator {
         if byr && iyr && eyr && hgt && hcl && ecl && pid {
             Ok(())
         } else {
-            Err(format!("byr:{} iyr:{} eyr:{} hgt:{} hcl:{} ecl:{} pid:{}",
-                        byr, iyr, eyr, hgt, hcl, ecl, pid).to_string())
+            Err(format!(
+                "byr:{} iyr:{} eyr:{} hgt:{} hcl:{} ecl:{} pid:{}",
+                byr, iyr, eyr, hgt, hcl, ecl, pid
+            )
+            .to_string())
         }
     }
 }
