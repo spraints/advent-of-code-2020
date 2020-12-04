@@ -126,13 +126,18 @@ interface IOutputProps {
 }
 
 interface IOutput {
-  todo: any
+  valid: number
+  scan_result: string[]
 }
 
 function Output({output}: IOutputProps) {
   return (
     <div>
-      <pre>{JSON.stringify(output)}</pre>
+      <p><b>{output.valid}</b></p>
+      <p>problems:</p>
+      <ul>
+        {output.scan_result.map(res => (<li><code>res}</code></li>))}
+      </ul>
     </div>
   )
 }

@@ -9,7 +9,7 @@ pub struct Input {
 #[derive(Serialize)]
 pub struct Output {
     valid: usize,
-    scan_result: Vec<Result<(), String>>,
+    failures: Vec<String>,
 }
 
 type P = Result<(), String>;
@@ -32,8 +32,10 @@ pub fn solve(input: Input) -> Result<Output, String> {
             },
         )
     };
-    let valid = scan_result.iter().filter(|x| x.is_ok()).count();
-    Ok(Output { valid, scan_result })
+    let (valid, not_valid): (Vec<P>, Vec<P>) = scan_result.into_iter().partition(|x| x.is_ok());
+    let valid = valid.len();
+    let failures = not_valid.into_iter().filter_map(|x| x.err()).collect();
+    Ok(Output { valid, failures })
 }
 
 fn scan(input: String, validator: Validator<impl Checker>) -> Vec<P> {
@@ -183,8 +185,8 @@ where
             Ok(())
         } else {
             Err(format!(
-                "byr:{} iyr:{} eyr:{} hgt:{} hcl:{} ecl:{} pid:{}",
-                byr, iyr, eyr, hgt, hcl, ecl, pid
+                "{}\nbyr:{} iyr:{} eyr:{} hgt:{} hcl:{} ecl:{} pid:{}",
+                passport, byr, iyr, eyr, hgt, hcl, ecl, pid
             )
             .to_string())
         }
