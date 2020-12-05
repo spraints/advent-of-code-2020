@@ -22,21 +22,26 @@ struct Seat {
 
 fn seat(pass: &str) -> Result<Seat, String> {
     let mut c = pass.chars();
-    let row = bit(c.next(), 'F', 'B')?;
-    let row = bit(c.next(), 'F', 'B')? + row * 2;
-    let row = bit(c.next(), 'F', 'B')? + row * 2;
-    let row = bit(c.next(), 'F', 'B')? + row * 2;
-    let row = bit(c.next(), 'F', 'B')? + row * 2;
-    let row = bit(c.next(), 'F', 'B')? + row * 2;
-    let row = bit(c.next(), 'F', 'B')? + row * 2;
-    let seat = bit(c.next(), 'L', 'R')?;
-    let seat = bit(c.next(), 'L', 'R')? + seat * 2;
-    let seat = bit(c.next(), 'L', 'R')? + seat * 2;
-    Ok(Seat {
-        row,
-        seat,
-        id: seat + row * 8,
-    })
+    let row = bits(&mut c, 0, 7, 'F', 'B')?;
+    let seat = bits(&mut c, 0, 3, 'L', 'R')?;
+    let id = seat + row * 8;
+    Ok(Seat { row, seat, id })
+}
+
+fn bits<'a>(
+    c: &mut std::str::Chars<'a>,
+    res: u16,
+    count: u8,
+    zero: char,
+    one: char,
+) -> Result<u16, String> {
+    match count {
+        0 => Ok(res),
+        _ => {
+            let b = bit(c.next(), zero, one)?;
+            bits(c, res * 2 + b, count - 1, zero, one)
+        }
+    }
 }
 
 fn bit(c: Option<char>, zero: char, one: char) -> Result<u16, String> {
