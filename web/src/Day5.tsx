@@ -117,8 +117,10 @@ class DayNG extends React.Component<IProps, IState> {
 
 ///
 
+const BOARDING_PASS = /[FBLR]+/g
+
 function parseDayInput(input: string): any {
-  return input
+  return input.match(BOARDING_PASS)
 }
 
 interface IOutputProps {
@@ -126,14 +128,15 @@ interface IOutputProps {
 }
 
 interface IOutput {
-  valid: number
-  failures: string[]
+  max_id: number
+  my_seat: number
 }
 
 function Output({output}: IOutputProps) {
   return (
     <div>
-      <code>{JSON.stringify(output)}</code>
+      <p>Max Seat ID: <b>{output.max_id}</b></p>
+      <p>My Seat ID: <b>{output.my_seat}</b></p>
     </div>
   )
 }

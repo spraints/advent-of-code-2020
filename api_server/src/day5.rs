@@ -3,21 +3,52 @@ use serde::{Deserialize, Serialize};
 #[derive(Deserialize)]
 pub struct Input {
     part2: bool,
-    input: String,
+    input: Vec<String>,
 }
 
 #[derive(Serialize)]
-pub struct Output {}
-
-pub fn solve(input: Input) -> Result<Output, String> {
-    Err("todo".to_string())
+pub struct Output {
+    max_id: u16,
+    my_seat: u16,
+    seats: Vec<Seat>,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Serialize, Debug, PartialEq)]
 struct Seat {
     row: u16,
     seat: u16,
     id: u16,
+}
+
+pub fn solve(input: Input) -> Result<Output, String> {
+    let mut seats = Vec::<Seat>::new();
+    let mut max_id = 0;
+    for pass in input.input {
+        let seat = seat(pass.as_str())?;
+        if seat.id > max_id {
+            max_id = seat.id;
+        }
+        seats.push(seat);
+    }
+    let my_seat = find_my_seat(&seats, max_id);
+    Ok(Output { max_id, my_seat, seats })
+}
+
+fn find_my_seat(seats: &Vec<Seat>, max_id: u16) -> u16 {
+    let mut occupied = [false; 128*8];
+    for seat in seats {
+        occupied[seat.id as usize] = true;
+    }
+    let mut last2 = (false, false);
+    for i in 0..max_id {
+        let cur = occupied[i as usize];
+        match (last2, cur) {
+            ((true, false), true) => return i - 1,
+            _ => ()
+        };
+        last2 = (last2.1, cur);
+    }
+    0
 }
 
 fn seat(pass: &str) -> Result<Seat, String> {
@@ -94,5 +125,15 @@ mod tests {
             },
             seat("BBFFBBFRLL").unwrap()
         );
+    }
+
+    #[test]
+    fn part2() {
+        let seats = vec![
+            Seat{row:0, seat:0, id:193},
+            Seat{row:0, seat:0, id:191},
+Seat{row:0, seat:0, id:194}
+        ];
+        assert_eq!(192, find_my_seat(&seats, 300));
     }
 }
