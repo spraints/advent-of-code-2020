@@ -42,8 +42,7 @@ class App extends React.Component<{}, { apiMessage: string }> {
 
         <Day3/>
 
-        <Day num="2">{(isPart2: boolean, input: string) =>
-          <Day2 part2={isPart2} input={input}/>}</Day>
+        <Day2/>
 
         <Day num="1">{(isPart2: boolean, input: string) =>
           <Day1 part2={isPart2} input={input}/>}</Day>

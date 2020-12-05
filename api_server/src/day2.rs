@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Deserialize)]
 pub struct Input {
-    lines: Vec<PasswordLine>,
+    input: Vec<PasswordLine>,
     part2: bool,
 }
 
@@ -28,7 +28,7 @@ pub struct Output {
 pub fn solve(input: Input) -> Result<Output, String> {
     let part2 = input.part2;
     let (valid, invalid) = input
-        .lines
+        .input
         .into_iter()
         .partition(|line| line.is_valid(part2));
     Ok(Output { valid, invalid })
@@ -77,7 +77,7 @@ mod tests {
     fn test_sample() {
         let input = Input {
             part2: false,
-            lines: vec![
+            input: vec![
                 pwline(1, 3, 'a', "abcde"),
                 pwline(1, 3, 'b', "cdefg"),
                 pwline(2, 9, 'c', "ccccccccc"),
@@ -96,7 +96,7 @@ mod tests {
     fn test_part2() {
         let input = Input {
             part2: true,
-            lines: vec![
+            input: vec![
                 pwline(1, 3, 'a', "abcde"),
                 pwline(1, 3, 'b', "cdefg"),
                 pwline(2, 9, 'c', "ccccccccc"),

@@ -1,11 +1,25 @@
 import * as React from 'react'
-import IDayProps from './DayProps'
+import DayNG from './DayNG'
 
 const PASSWORD_LINE = /(\d+)-(\d+) (.): (.*)/g
 const PASSWORD_LINE2 = /(\d+)-(\d+) (.): (.*)/
 
-interface IState {
-  output: IOutput | null
+function parseDay2Input(input: string): any {
+  const matches = input.match(PASSWORD_LINE)
+  return [...matches!].map((match: string) => {
+    const m = match.match(PASSWORD_LINE2)
+    if (!m) {
+      return {}
+    }
+    return {
+      password: m[4],
+      policy: {min: parseInt(m[1], 10), max: parseInt(m[2], 10), c: m[3]}
+    }
+  })
+}
+
+interface IOutputProps {
+  output: IOutput
 }
 
 interface IOutput {
@@ -24,70 +38,28 @@ interface IPasswordPolicy {
   c: string
 }
 
-class Today extends React.Component<IDayProps, IState> {
-  constructor(props: IDayProps) {
-    super(props)
-    this.state = { output: null }
-    this.solve()
-  }
-
-  public componentDidUpdate(prevProps: IDayProps) {
-    if (this.props.input !== prevProps.input || this.props.part2 !== prevProps.part2) {
-      this.solve()
-    }
-  }
-
-  public render() {
-    if (this.state.output == null) {
-      return ''
-    }
-    const Res = (props: any) => (
-      <div>
-        <i>{props.label}</i>
-        <ul>
-          {props.items.map((line: IPasswordLine) => (<li>{line.policy.min}-{line.policy.max} {line.policy.c}: {line.password}</li>))}
-        </ul>
-      </div>
-    )
-    return (
-      <p>
-        <b>{this.state.output.valid.length}</b>
-        <Res label="Valid" items={this.state.output.valid}/>
-        <Res label="Not valid" items={this.state.output.invalid}/>
-      </p>
-    )
-  }
-
-  private async solve() {
-    this.setState({output: null})
-    const matches = this.props.input.match(PASSWORD_LINE)
-    if (matches) {
-      const lines = [...matches].map((match: string) => {
-        const m = match.match(PASSWORD_LINE2)
-        if (!m) {
-          return {}
-        }
-        return {
-          password: m[4],
-          policy: {min: parseInt(m[1], 10), max: parseInt(m[2], 10), c: m[3]}
-        }
-      })
-
-      // tslint:disable:no-console
-      // console.log(passwords)
-
-      const req = {
-        body: JSON.stringify({lines, part2: this.props.part2}),
-        headers: {"Content-Type": "application/json"},
-        method: "POST"
-      }
-      const res = await fetch("/api/day2", req)
-      if (res.status === 200) {
-        const output = await res.json() as IOutput
-        this.setState({output})
-      }
-    }
-  }
+function Day2Output({output}: IOutputProps) {
+  const Res = (props: any) => (
+    <div>
+      <i>{props.label}</i>
+      <ul>
+        {props.items.map((line: IPasswordLine) => (<li>{line.policy.min}-{line.policy.max} {line.policy.c}: {line.password}</li>))}
+      </ul>
+    </div>
+  )
+  return (
+    <p>
+      <b>{output.valid.length}</b>
+      <Res label="Valid" items={output.valid}/>
+      <Res label="Not valid" items={output.invalid}/>
+    </p>
+  )
 }
 
-export default Today
+export default function() {
+  return (
+    <DayNG num="2" url="/api/day2" parseInput={parseDay2Input}>
+      {(output: any) => <Day2Output output={output}/>}
+    </DayNG>
+  )
+}
