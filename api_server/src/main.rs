@@ -50,6 +50,11 @@ fn do_day4(input: Json<api_server::day4::Input>) -> Solution<api_server::day4::O
     resp(api_server::day4::solve(input.into_inner()))
 }
 
+#[post("/day5", format = "json", data = "<input>")]
+fn do_day5(input: Json<api_server::day5::Input>) -> Solution<api_server::day5::Output> {
+    resp(api_server::day5::solve(input.into_inner()))
+}
+
 #[catch(503)]
 fn service_not_available(_req: &Request) -> &'static str {
     "Service is not available. (Is the database up?)"
@@ -58,6 +63,9 @@ fn service_not_available(_req: &Request) -> &'static str {
 fn main() {
     rocket::ignite()
         .register(catchers![service_not_available])
-        .mount("/api", routes![index, do_day1, do_day2, do_day3, do_day4])
+        .mount(
+            "/api",
+            routes![index, do_day1, do_day2, do_day3, do_day4, do_day5],
+        )
         .launch();
 }
