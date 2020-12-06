@@ -1,6 +1,5 @@
 import * as React from 'react';
 
-import Day from './Day';
 import Day1 from './Day1';
 import Day2 from './Day2';
 import Day3 from './Day3';
@@ -44,8 +43,7 @@ class App extends React.Component<{}, { apiMessage: string }> {
 
         <Day2/>
 
-        <Day num="1">{(isPart2: boolean, input: string) =>
-          <Day1 part2={isPart2} input={input}/>}</Day>
+        <Day1/>
 
         <h2>Status</h2>
         <p>

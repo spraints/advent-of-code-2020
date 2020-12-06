@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 #[derive(Deserialize)]
 pub struct Input {
     part2: bool,
-    numbers: Vec<u64>,
+    input: Vec<u64>,
 }
 
 #[derive(Serialize, Debug, PartialEq)]
@@ -13,7 +13,7 @@ pub struct Output {
 }
 
 pub fn solve(input: Input) -> Result<Output, String> {
-    match solve2(&input.numbers, 0, 0, if input.part2 { 2 } else { 1 }) {
+    match solve2(&input.input, 0, 0, if input.part2 { 2 } else { 1 }) {
         Some(x) => Ok(x),
         None => Err("no set of three numbers adds up to 2020".to_string()),
     }
@@ -56,7 +56,7 @@ mod tests {
     fn test_sample() {
         let input = Input {
             part2: false,
-            numbers: vec![1721, 979, 366, 299, 675, 1456],
+            input: vec![1721, 979, 366, 299, 675, 1456],
         };
         assert_eq!(
             Ok(Output {
@@ -71,7 +71,7 @@ mod tests {
     fn test_part2() {
         let input = Input {
             part2: true,
-            numbers: vec![1721, 979, 366, 299, 675, 1456],
+            input: vec![1721, 979, 366, 299, 675, 1456],
         };
         assert_eq!(
             Ok(Output {
