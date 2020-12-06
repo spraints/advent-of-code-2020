@@ -1,15 +1,23 @@
-a = nil
-b = 0
+a1 = []
+b1 = 0
+a2 = nil
+b2 = 0
 readlines.each do |line|
   ans = line.strip.split //
   if ans.empty?
-    b += a.size
-    a = nil
-  elsif a.nil?
-    a = ans
+    b1 += a1.uniq.size
+    b2 += a2.size
+    a1 = []
+    a2 = nil
   else
-    a &= ans
+    if a2.nil?
+      a2 = ans
+    else
+      a2 &= ans
+    end
+    a1 += ans
   end
 end
-b += a.size
-puts b
+b1 += a1.uniq.size
+b2 += a2.size
+puts b1, b2
