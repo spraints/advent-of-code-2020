@@ -1,5 +1,5 @@
 import * as React from 'react'
-import DayNG from './DayNG'
+import Day from './Day'
 
 const NUMBERS = /\d+/g
 
@@ -28,8 +28,8 @@ function Day1Output({output}: IOutputProps) {
 
 export default function() {
   return (
-    <DayNG num="1" url="/api/day1" parseInput={parseDay1Input}>
+    <Day num="1" url="/api/day1" parseInput={parseDay1Input}>
       {(output: any) => <Day1Output output={output}/>}
-    </DayNG>
+    </Day>
   )
 }

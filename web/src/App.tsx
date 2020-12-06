@@ -36,13 +36,9 @@ class App extends React.Component<{}, { apiMessage: string }> {
         </div>
 
         <Day5/>
-
         <Day4/>
-
         <Day3/>
-
         <Day2/>
-
         <Day1/>
 
         <h2>Status</h2>

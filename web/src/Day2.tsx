@@ -1,5 +1,5 @@
 import * as React from 'react'
-import DayNG from './DayNG'
+import Day from './Day'
 
 const PASSWORD_LINE = /(\d+)-(\d+) (.): (.*)/g
 const PASSWORD_LINE2 = /(\d+)-(\d+) (.): (.*)/
@@ -58,8 +58,8 @@ function Day2Output({output}: IOutputProps) {
 
 export default function() {
   return (
-    <DayNG num="2" url="/api/day2" parseInput={parseDay2Input}>
+    <Day num="2" url="/api/day2" parseInput={parseDay2Input}>
       {(output: any) => <Day2Output output={output}/>}
-    </DayNG>
+    </Day>
   )
 }

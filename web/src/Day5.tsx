@@ -1,5 +1,5 @@
 import * as React from 'react'
-import DayNG from './DayNG'
+import Day from './Day'
 
 const BOARDING_PASS = /[FBLR]+/g
 
@@ -27,8 +27,8 @@ function Output({output}: IOutputProps) {
 
 export default function() {
   return (
-    <DayNG num="5" url="/api/day5" parseInput={parseDayInput}>
+    <Day num="5" url="/api/day5" parseInput={parseDayInput}>
       {(output: IOutput) => <Output output={output}/>}
-    </DayNG>
+    </Day>
   )
 }

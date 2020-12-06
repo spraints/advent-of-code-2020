@@ -1,5 +1,5 @@
 import * as React from 'react'
-import DayNG from './DayNG'
+import Day from './Day'
 
 function parseDay3Input(input: string): any {
   return input
@@ -40,8 +40,8 @@ function renderRun(run: IRun) {
 
 export default function() {
   return (
-    <DayNG num="3" url="/api/day3" parseInput={parseDay3Input}>
+    <Day num="3" url="/api/day3" parseInput={parseDay3Input}>
       {(output: any) => <Day3Output output={output}/>}
-    </DayNG>
+    </Day>
   )
 }
