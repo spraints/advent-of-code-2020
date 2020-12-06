@@ -5,7 +5,7 @@ b2 = 0
 readlines.each do |line|
   ans = line.strip.split //
   if ans.empty?
-    b1 += a1.uniq.size
+    b1 += a1.size
     b2 += a2.size
     a1 = []
     a2 = nil
@@ -15,9 +15,9 @@ readlines.each do |line|
     else
       a2 &= ans
     end
-    a1 += ans
+    a1 |= ans
   end
 end
-b1 += a1.uniq.size
+b1 += a1.size
 b2 += a2.size
 puts b1, b2

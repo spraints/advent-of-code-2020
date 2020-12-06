@@ -55,6 +55,11 @@ fn do_day5(input: Json<api_server::day5::Input>) -> Solution<api_server::day5::O
     resp(api_server::day5::solve(input.into_inner()))
 }
 
+#[post("/day6", format = "json", data = "<input>")]
+fn do_day6(input: Json<api_server::day6::Input>) -> Solution<api_server::day6::Output> {
+    resp(api_server::day6::solve(input.into_inner()))
+}
+
 #[catch(503)]
 fn service_not_available(_req: &Request) -> &'static str {
     "Service is not available. (Is the database up?)"
@@ -65,7 +70,7 @@ fn main() {
         .register(catchers![service_not_available])
         .mount(
             "/api",
-            routes![index, do_day1, do_day2, do_day3, do_day4, do_day5],
+            routes![index, do_day1, do_day2, do_day3, do_day4, do_day5, do_day6],
         )
         .launch();
 }
