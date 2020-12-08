@@ -1,12 +1,16 @@
+
+def acc(val)
+  {inst: "acc", val: val}
+end
+def jmp(val)
+  {inst: "jmp", val: val}
+end
+def nop(val)
+  {inst: "nop", val: val}
+end
 def main(input)
-  prog = (input.lines.map { |l|
-    l =~ /(acc|jmp|nop) +([+-])(\d+)/
-    inst = $1
-    sign = $2
-    val = $3.to_i
-    val = -val if sign == '-'
-    {inst: inst, val: val}
-  })
+  prog = (input.lines.map { |l| eval(l) })
+
   puts "part 1: #{run(prog)} (expect 1832)"
 
   prog << {inst: :END}
@@ -44,11 +48,11 @@ def main(input)
     end
   end
 
-  prog.each { |x| x.delete :reachable }
   puts "part 2: #{run(prog)} (expect 662)"
 end
 
 def run(prog)
+  prog.each { |x| x.delete :reachable }
   acc = 0
   pc = 0
   loop do
