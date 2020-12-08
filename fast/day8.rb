@@ -1,76 +1,60 @@
 def main(input)
-  prog = input.lines.map { |l|
+  prog = (input.lines.map { |l|
     l =~ /(acc|jmp|nop) +([+-])(\d+)/
     inst = $1
     sign = $2
     val = $3.to_i
     val = -val if sign == '-'
-    [inst, val].freeze
-  }.freeze
+    {inst: inst, val: val, ok: [], nok: [], step: []}.freeze
+  } + [{ok: [], nok: [], step: [:EOF]}]).freeze
   acc = 0
-  seen = []
   pc = 0
+  steps = 0
   loop do
-    seen[pc] = true
-    inst, val = prog[pc]
-    case inst
+    x = prog[pc]
+    x[:step] << steps
+    steps += 1
+    case x.fetch(:inst)
     when 'acc'
-      acc += val
+      acc += x.fetch(:val)
       pc += 1
     when 'nop'
       pc += 1
     when 'jmp'
-      pc += val
+      pc += x.fetch(:val)
     end
-    break if seen[pc]
+    break unless prog[pc][:step].empty?
   end
-  puts "part 1: #{acc}"
+  puts "part 1: #{acc} (expect 1832)"
   acc = run2(prog)
-  puts "part 2: #{acc}"
+  puts "part 2: #{acc} (expect 662)"
 
-  puts "part 1: #{Comp.new(prog).run}"
-end
-
-class Comp
-  def initialize(prog)
-    @prog = prog
-  end
-
-  def run
-    pc = 0
-    acc = 0
-    seen = []
-    steps = 0
-    loop do
-      if seen[pc]
-        return {acc: acc, pc: pc, steps: steps, loop: true}
-      end
-      seen[pc] = true
-      if inst = @prog[pc]
-        steps += 1
-        pc, acc = runinst(*inst, pc: pc, acc: acc)
-      else
-        return {acc: acc, pc: pc, steps: steps, loop: false}
-      end
-    end
-  end
-
-  def runinst(inst, val, pc:, acc:)
+  prog.each_with_index do |x, i|
+    inst = c.fetch(:inst)
+    val = c.fetch(:val)
     case inst
     when 'acc'
-      [pc + 1, acc + val]
-    when 'nop'
-      [pc + 1, acc]
+      prog[i+1][:ok] << i
     when 'jmp'
-      [pc + val, acc]
+      prog[i+val][:ok] << i
+      prog[i+1][:nok] << i
+    when 'nop'
+      prog[i+1][:ok] << i
+      prog[i+val][:nok] << i
     end
+  end
+  pc = prog.size - 1
+  loop do
+    # https://www.geeksforgeeks.org/minimum-cost-of-simple-path-between-two-nodes-in-a-directed-and-weighted-graph/ ?
   end
 end
 
 def run2(prog, pc: 0, acc: 0, seen: {}, mutate: true)
   raise LoopDetected if seen[pc]
   seen = seen.merge(pc => true)
-  inst, val = prog[pc]
+  x = prog[pc]
+  inst = x[:inst]
+  val = x[:val]
   return acc if inst.nil?
   case inst
   when 'acc'
