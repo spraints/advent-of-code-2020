@@ -5,8 +5,8 @@ def main(input)
     sign = $2
     val = $3.to_i
     val = -val if sign == '-'
-    [inst, val]
-  }
+    [inst, val].freeze
+  }.freeze
   acc = 0
   seen = []
   pc = 0
@@ -27,6 +27,44 @@ def main(input)
   puts "part 1: #{acc}"
   acc = run2(prog)
   puts "part 2: #{acc}"
+
+  puts "part 1: #{Comp.new(prog).run}"
+end
+
+class Comp
+  def initialize(prog)
+    @prog = prog
+  end
+
+  def run
+    pc = 0
+    acc = 0
+    seen = []
+    steps = 0
+    loop do
+      if seen[pc]
+        return {acc: acc, pc: pc, steps: steps, loop: true}
+      end
+      seen[pc] = true
+      if inst = @prog[pc]
+        steps += 1
+        pc, acc = runinst(*inst, pc: pc, acc: acc)
+      else
+        return {acc: acc, pc: pc, steps: steps, loop: false}
+      end
+    end
+  end
+
+  def runinst(inst, val, pc:, acc:)
+    case inst
+    when 'acc'
+      [pc + 1, acc + val]
+    when 'nop'
+      [pc + 1, acc]
+    when 'jmp'
+      [pc + val, acc]
+    end
+  end
 end
 
 def run2(prog, pc: 0, acc: 0, seen: {}, mutate: true)
