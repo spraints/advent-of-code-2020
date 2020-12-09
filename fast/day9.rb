@@ -4,10 +4,28 @@ def main(input)
   preamble = ARGV.first.to_i
   preamble = 25 if preamble < 1
 
-  puts "part 1: #{part1(pre: input.take(preamble), rest: input.drop(preamble))}"
+  w1 = weakness1(pre: input.take(preamble), rest: input.drop(preamble))
+  puts "part 1: #{w1}"
+  w2 = weakness2(w1, input)
+  puts "part 2: #{w2.sum} => #{w2.min + w2.max}"
 end
 
-def part1(pre:, rest:)
+def weakness2(n, arr)
+  res = []
+  acc = 0
+  until acc == n || arr.empty?
+    if acc < n
+      x = arr.shift
+      res << x
+      acc += x
+    elsif acc > n
+      acc -= res.shift
+    end
+  end
+  res
+end
+
+def weakness1(pre:, rest:)
   #p pre
   while has_sum2?(rest.first, pre)
     pre.shift
