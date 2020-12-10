@@ -1,56 +1,55 @@
+require "benchmark"
+require_relative "./lib"
+
 def main(input)
   input = input.split.map(&:to_i)
 
   preamble = ARGV.first.to_i
   preamble = 25 if preamble < 1
 
-  w1 = weakness1(pre: input.take(preamble), rest: input.drop(preamble))
+  w1 = nil
+  w2 = nil
+  Benchmark.bmbm do |x|
+    x.report("part 1") do
+      w1 = weakness1(input, preamble: preamble)
+    end
+    x.report("part 2") do
+      w2 = weakness2(input, sum: w1)
+    end
+  end
   puts "part 1: #{w1}"
-  w2 = weakness2(w1, input)
-  puts "part 2: #{w2.sum} => #{w2.min + w2.max}"
+  puts "part 2: #{w2.min + w2.max} (#{w2.size})"
 end
 
-def weakness2(n, arr)
-  res = []
-  acc = 0
-  until acc == n || arr.empty?
-    if acc < n
-      x = arr.shift
-      res << x
-      acc += x
-    elsif acc > n
-      acc -= res.shift
+def weakness2(arr, sum:)
+  acc = arr.take(2).sum
+  first = 0
+  last = 1
+  loop do
+    if acc == sum
+      return arr.slice(first..last)
+    elsif last - first < 2 || acc < sum
+      last += 1
+      if last < arr.size
+        acc += arr[last]
+      else
+        return nil
+      end
+    else
+      acc -= arr[first]
+      first += 1
     end
   end
-  res
 end
 
-def weakness1(pre:, rest:)
-  #p pre
-  while has_sum2?(rest.first, pre)
-    pre.shift
-    pre.push(rest.shift)
-    #p pre
-  end
-  rest.first
-end
-
-def has_sum2?(n, arr)
-  return false if n.nil?
-  arr = arr.sort
-  a = arr.shift
-  b = arr.pop
-    #p a: a, b: b, arr: arr
-  until arr.empty? || a + b == n
-    if a + b < n
-      a = arr.shift
-    elsif a + b > n
-      b = arr.pop
+def weakness1(arr, preamble:)
+  arr.each_cons(preamble + 1) do |nums|
+    sum = nums.pop
+    if sum2(nums, sum: sum).nil?
+      return sum
     end
-    #p a: a, b: b, arr: arr
   end
-  #puts "(#{a + b == n} ~ #{n})"
-  a + b == n
+  raise "no weakness found"
 end
 
 main($stdin.read)
