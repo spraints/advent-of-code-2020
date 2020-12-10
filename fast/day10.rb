@@ -21,26 +21,30 @@ def main(input)
 
   bm "part 2"
 
-  next_steps = {}
-  j = 0
-  input.each_with_index do |x, i|
-    while j < input.size && input[j] <= x + 3
-      j += 1
-    end
-    next_steps[x] = input.slice((i+1)..(j-1))
-  end
-  choices = {}
-  input.reverse.each do |x|
-    s = next_steps[x]
-    if s.empty?
-      choices[x] = 1
-    else
-      choices[x] = s.map { |y| choices[y] }.sum
-    end
-  end
-  puts "part2: #{choices[0]}"
+  puts "part 2: #{DP.new(input).dp(0)}"
 
   bm_done
+end
+
+class DP
+  def initialize(input)
+    @input = input
+    @dp = {}
+    @n = 0
+  end
+
+  def dp(i)
+    return @dp[i] if @dp[i]
+    j = i + 1
+    return 1 unless j < @input.size
+    ways = 0
+    lim = @input[i] + 3
+    while j < @input.size && @input[j] <= lim
+      ways += dp(j)
+      j += 1
+    end
+    @dp[i] = ways
+  end
 end
 
 main($stdin.read)
