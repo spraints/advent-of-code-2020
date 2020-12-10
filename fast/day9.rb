@@ -1,24 +1,22 @@
-require "benchmark"
 require_relative "./lib"
 
 def main(input)
+  bm "parse"
+
   input = input.split.map(&:to_i)
 
   preamble = ARGV.first.to_i
   preamble = 25 if preamble < 1
 
-  w1 = nil
-  w2 = nil
-  Benchmark.bmbm do |x|
-    x.report("part 1") do
-      w1 = weakness1(input, preamble: preamble)
-    end
-    x.report("part 2") do
-      w2 = weakness2(input, sum: w1)
-    end
-  end
+  bm "part 1"
+  w1 = weakness1(input, preamble: preamble)
   puts "part 1: #{w1}"
+
+  bm "part 2"
+  w2 = weakness2(input, sum: w1)
   puts "part 2: #{w2.min + w2.max} (#{w2.size})"
+
+  bm_done
 end
 
 def weakness2(arr, sum:)

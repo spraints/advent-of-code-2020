@@ -34,7 +34,7 @@ def main(input)
   while broken && pc = end_reachable.shift
     end_reachable += (prog[pc][:from] || [])
     (prog[pc][:mfrom] || []).each do |i|
-      if prog[i][:reachable]
+      if prog[i][:reached]
         p broken: prog[i], i: i
         prog[i][:inst] = 
           if prog[i][:inst] == 'jmp'
@@ -52,12 +52,12 @@ def main(input)
 end
 
 def run(prog)
-  prog.each { |x| x.delete :reachable }
+  prog.each { |x| x.delete :reached }
   acc = 0
   pc = 0
   loop do
     x = prog[pc]
-    x[:reachable] = true
+    x[:reached] = true
     case x.fetch(:inst)
     when 'acc'
       acc += x.fetch(:val)
@@ -69,7 +69,7 @@ def run(prog)
     when :END
       return [acc, true]
     end
-    if prog[pc][:reachable]
+    if prog[pc][:reached]
       return [acc, false]
     end
   end

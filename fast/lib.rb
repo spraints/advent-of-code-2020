@@ -27,3 +27,18 @@ def sum3(arr, sum:)
   end
   nil
 end
+
+$bms = []
+
+def bm(label)
+  $bms << [label, Process.clock_gettime(Process::CLOCK_MONOTONIC)]
+end
+
+def bm_done
+  $bms << [:done, Process.clock_gettime(Process::CLOCK_MONOTONIC)]
+  $bms.each_cons(2) do |start, stop|
+    label, start = start
+    _, stop = stop
+    printf "%20s %9.3fms\n", label, 1000.0 * (stop - start)
+  end
+end
