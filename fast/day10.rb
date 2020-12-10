@@ -22,8 +22,12 @@ def main(input)
   bm "part 2"
 
   next_steps = {}
-  input.each do |x|
-    next_steps[x] = input.select { |y| y > x && y <= x + 3 }
+  j = 0
+  input.each_with_index do |x, i|
+    while j < input.size && input[j] <= x + 3
+      j += 1
+    end
+    next_steps[x] = input.slice((i+1)..(j-1))
   end
   choices = {}
   input.reverse.each do |x|
@@ -34,44 +38,9 @@ def main(input)
       choices[x] = s.map { |y| choices[y] }.sum
     end
   end
-  p choices[0]
-  
-
-  #w2 = weakness2(input, sum: w1)
-  #puts "part 2: #{w2.min + w2.max} (#{w2.size})"
+  puts "part2: #{choices[0]}"
 
   bm_done
 end
-
-#def weakness2(arr, sum:)
-#  acc = arr.take(2).sum
-#  first = 0
-#  last = 1
-#  loop do
-#    if acc == sum
-#      return arr.slice(first..last)
-#    elsif last - first < 2 || acc < sum
-#      last += 1
-#      if last < arr.size
-#        acc += arr[last]
-#      else
-#        return nil
-#      end
-#    else
-#      acc -= arr[first]
-#      first += 1
-#    end
-#  end
-#end
-#
-#def weakness1(arr, preamble:)
-#  arr.each_cons(preamble + 1) do |nums|
-#    sum = nums.pop
-#    if sum2(nums, sum: sum).nil?
-#      return sum
-#    end
-#  end
-#  raise "no weakness found"
-#end
 
 main($stdin.read)
