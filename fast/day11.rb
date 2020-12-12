@@ -74,17 +74,23 @@ DIRECTIONS = [
 def neighbors(chart, x, y, skip_empty_space: false)
   maxx = chart.size
   maxy = chart[x].size
-  DIRECTIONS.inject(0) do |count, (dx, dy)|
+  count = 0
+  DIRECTIONS.each do |dx, dy|
     nx, ny = x + dx, y + dy
-    while skip_empty_space && nx >= 0 && nx < maxx && ny >= 0 && ny < maxy && chart[nx][ny] == "."
+    while nx >= 0 && nx < maxx && ny >= 0 && ny < maxy
+      case chart[nx][ny]
+      when "L"
+        break
+      when "#"
+        count += 1
+        break
+      when "."
+        break unless skip_empty_space
+      end
       nx, ny = nx + dx, ny + dy
     end
-    if nx >= 0 && nx < maxx && ny >= 0 && ny < maxy && chart[nx][ny] == "#"
-      count + 1
-    else
-      count
-    end
   end
+  count
 end
 
 main($stdin.read)
