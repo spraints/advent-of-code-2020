@@ -7,12 +7,11 @@ def main(input)
 
   bm "part 1"
 
-  puts "part 1: #{move(input)}"
-  #puts "part 1: #{occupied} (should be 2211)"
+  puts "part 1: #{move(input)} should be 319"
 
   bm "part 2"
 
-  puts "part2: #{move2(input)} < 56981 < 74119"
+  puts "part2: #{move2(input)} should be 50157"
 
   bm_done
 end
@@ -70,8 +69,6 @@ def move2(steps)
   x, y = 0, 0
   dx, dy = 10, 1
   steps.each do |t, d|
-    #p p: [x,y], w: [dx, dy]
-    #p [t, d]
     case t
     when "N"
       dy += d
@@ -82,13 +79,9 @@ def move2(steps)
     when "W"
       dx -= d
     when "L"
-      p w: [dx, dy], L: d
       dx, dy = rot(dx, dy, 360-d)
-      p w: [dx, dy]
     when "R"
-      p w: [dx, dy], R: d
       dx, dy = rot(dx, dy, d)
-      p w: [dx, dy]
     when "F"
       x += d * dx
       y += d * dy
@@ -98,38 +91,13 @@ def move2(steps)
 end
 
 def rot(x, y, deg)
-  p deg: deg, x: x, y: y
   case deg
   when 90
-    if x > 0
-      if y > 0
-        [y, -x]
-      else
-        [y, -x]
-      end
-    else
-      if y < 0
-        [y, -x]
-      else
-        [y, -x]
-      end
-    end
+    [y, -x]
   when 180
     [-x, -y]
   when 270
-    if x > 0
-      if y > 0
-        [-y, x]
-      else
-        [-y, x]
-      end
-    else
-      if y < 0
-        [-y, x]
-      else
-        [-y, x]
-      end
-    end
+    [-y, x]
   else
     raise "rot #{deg}"
   end
