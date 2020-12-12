@@ -25,7 +25,7 @@ end
 # Action F means to move forward by the given value in the direction the ship is currently facing.
 def move(steps)
   x, y = 0, 0
-  dir = 90
+  dx, dy = 1, 0
   steps.each do |t, d|
     case t
     when "N"
@@ -37,22 +37,12 @@ def move(steps)
     when "W"
       x -= d
     when "L"
-      dir = (dir + 360 - d) % 360
+      dx, dy = rot(dx, dy, 360-d)
     when "R"
-      dir = (dir + d) % 360
+      dx, dy = rot(dx, dy, d)
     when "F"
-      case dir
-      when 0
-        y += d
-      when 90
-        x += d
-      when 180
-        y -= d
-      when 270
-        x -= d
-      else
-        raise "dir #{dir}"
-      end
+      x += d * dx
+      y += d * dy
     end
   end
   x.abs + y.abs
