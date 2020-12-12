@@ -16,6 +16,13 @@ def main(input)
   bm_done
 end
 
+N = Complex(0,1)
+S = Complex(0,-1)
+E = Complex(1,0)
+W = Complex(-1,0)
+L = Complex(0,1)
+R = Complex(0,-1)
+
 # Action N means to move north by the given value.
 # Action S means to move south by the given value.
 # Action E means to move east by the given value.
@@ -24,28 +31,27 @@ end
 # Action R means to turn right the given number of degrees.
 # Action F means to move forward by the given value in the direction the ship is currently facing.
 def move(steps)
-  x, y = 0, 0
-  dx, dy = 1, 0
+  pos = 0.to_c
+  dir = 1.to_c
   steps.each do |t, d|
     case t
     when "N"
-      y += d
+      pos += N*d
     when "S"
-      y -= d
+      pos += S*d
     when "E"
-      x += d
+      pos += E*d
     when "W"
-      x -= d
+      pos += W*d
     when "L"
-      dx, dy = rot(dx, dy, 360-d)
+      dir *= L**(d/90)
     when "R"
-      dx, dy = rot(dx, dy, d)
+      dir *= R**(d/90)
     when "F"
-      x += d * dx
-      y += d * dy
+      pos += dir*d
     end
   end
-  x.abs + y.abs
+  pos.rect.map(&:abs).sum
 end
 
 # Action N means to move the waypoint north by the given value.
@@ -56,28 +62,27 @@ end
 # Action R means to rotate the waypoint around the ship right (clockwise) the given number of degrees.
 # Action F means to move forward to the waypoint a number of times equal to the given value.
 def move2(steps)
-  x, y = 0, 0
-  dx, dy = 10, 1
+  pos = 0.to_c
+  way = Complex(10,1)
   steps.each do |t, d|
     case t
     when "N"
-      dy += d
+      way += N*d
     when "S"
-      dy -= d
+      way += S*d
     when "E"
-      dx += d
+      way += E*d
     when "W"
-      dx -= d
+      way += W*d
     when "L"
-      dx, dy = rot(dx, dy, 360-d)
+      way *= L**(d/90)
     when "R"
-      dx, dy = rot(dx, dy, d)
+      way *= R**(d/90)
     when "F"
-      x += d * dx
-      y += d * dy
+      pos += way*d
     end
   end
-  x.abs + y.abs
+  pos.rect.map(&:abs).sum
 end
 
 def rot(x, y, deg)
