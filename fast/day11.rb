@@ -11,13 +11,13 @@ def main(input)
   n = 0
   loop do
     n += 1
-    step = fill_seats(cur, tol: 4) { |i, j| occupied_neighbors(cur, i, j) }
+    step = fill_seats(cur, tol: 4, part2: false)
     break if step == cur
     cur = step
   end
 
   occupied = cur.flatten.grep("#").size
-  puts "part 1: #{occupied}"
+  puts "part 1: #{occupied} (should be 2211)"
 
   bm "part 2"
 
@@ -26,14 +26,14 @@ def main(input)
   loop do
     #puts "STEP"
     n += 1
-    step = fill_seats(cur, tol: 5) { |i, j| visible_occupied(cur, i, j) }
+    step = fill_seats(cur, tol: 5, part2: true)
     #pc step
     break if step == cur
     cur = step
   end
 
   occupied = cur.flatten.grep("#").size
-  puts "part 2: #{occupied}"
+  puts "part 2: #{occupied} (should be 1995)"
 
   bm_done
 end
@@ -43,12 +43,12 @@ def pc(chart)
   sleep 1
 end
 
-def fill_seats(chart, tol:)
+def fill_seats(chart, tol:, part2:)
   step = chart.map(&:dup)
   chart.each_with_index do |line, i|
     line.each_with_index do |seat, j|
       next if seat == "."
-      occ = yield(i, j)
+      occ = neighbors(chart, i, j, skip_empty_space: part2)
       #puts "#{i},#{j}=#{seat} #{occ}"
       if seat == "L" && occ == 0
         step[i][j] = "#"
@@ -60,47 +60,31 @@ def fill_seats(chart, tol:)
   step
 end
 
-def occupied_neighbors(chart, i, j)
-  occ = 0
-  ((i-1)..(i+1)).each do |ii|
-    ((j-1)..(j+1)).each do |jj|
-      next if ii < 0
-      next if jj < 0
-      next if ii == i && jj == j
-      next unless ii < chart.size
-      next unless jj < chart[ii].size
-      occ += 1 if chart[ii][jj] == "#"
-    end
-  end
-  occ
-end
+DIRECTIONS = [
+  [-1, -1],
+  [0, -1],
+  [1, -1],
+  [1, 0],
+  [1, 1],
+  [0, 1],
+  [-1, 1],
+  [-1, 0],
+]
 
-def visible_occupied(chart, i, j)
-  occ = 0
-  [
-    [-1, -1],
-    [0, -1],
-    [1, -1],
-    [1, 0],
-    [1, 1],
-    [0, 1],
-    [-1, 1],
-    [-1, 0],
-  ].each do |si, sj|
-    ci, cj = i + si, j + sj
-    while ci >= 0 && cj >= 0 && ci < chart.size && cj < chart[ci].size
-      case chart[ci][cj]
-      when "L"
-        break
-      when "#"
-        #puts "[#{i},#{j}] => # @ [#{ci}, #{cj}] ([#{si}, #{sj}])"
-        occ += 1
-        break
-      end
-      ci, cj = ci + si, cj + sj
+def neighbors(chart, x, y, skip_empty_space: false)
+  maxx = chart.size
+  maxy = chart[x].size
+  DIRECTIONS.inject(0) do |count, (dx, dy)|
+    nx, ny = x + dx, y + dy
+    while skip_empty_space && nx >= 0 && nx < maxx && ny >= 0 && ny < maxy && chart[nx][ny] == "."
+      nx, ny = nx + dx, ny + dy
+    end
+    if nx >= 0 && nx < maxx && ny >= 0 && ny < maxy && chart[nx][ny] == "#"
+      count + 1
+    else
+      count
     end
   end
-  occ
 end
 
 main($stdin.read)
