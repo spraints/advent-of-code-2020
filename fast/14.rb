@@ -15,11 +15,9 @@ def main(input)
     when /mem\[(\d+)\] = (\d+)/
       addr = $1.to_i
       val = $2.to_i
-      #p addr: addr, val: val, andmask: andmask.to_s(16), ormask: ormask.to_s(16)
       mem[addr] = (val & andmask) | ormask
     when /mask = (.*)/
       newmask = parse_mask($1)
-      #p newmask
       ormask = newmask[0]
       andmask = newmask[1]
     else
@@ -27,7 +25,6 @@ def main(input)
     end
   end
 
-  #p mem
   puts "part 1: #{mem.values.sum}"
 
   bm "part 2"
