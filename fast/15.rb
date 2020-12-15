@@ -20,7 +20,6 @@ def main(input)
         0
       end
     said[last] = turn - 1 if last
-    #puts "#{turn}: #{n} #{said.inspect}"
     last = n
   end
   puts "part 1: #{last}"
@@ -40,15 +39,12 @@ def main(input)
         0
       end
     said[last] = turn - 1 if last
-    #puts "#{turn}: #{n} #{said.inspect}"
     last = n
   end
   puts "part 1: #{last}"
 
+ensure
   bm_done
 end
 
-puts "-----sample-----"
-main("0,3,6")
-puts "-----stdin-----"
 main($stdin.read)
