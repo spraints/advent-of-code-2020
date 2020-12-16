@@ -9,7 +9,7 @@ def main(input)
 
   init = input.dup
   last = nil
-  said = {}
+  said = [nil] * 2020
   1.upto(2020) do |turn|
     n =
       if x = init.shift
@@ -28,7 +28,7 @@ def main(input)
 
   init = input.dup
   last = nil
-  said = {}
+  said = [nil] * 30_000_000
   1.upto(30000000) do |turn|
     n =
       if x = init.shift
