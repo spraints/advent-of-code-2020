@@ -42,44 +42,13 @@ def main(input)
   end
 
   my_ticket = ticket.split(",").map(&:to_i)
-  xs = []
+  res = 1
   cols.each_with_index do |(label, _), i|
     if label =~ /^departure/
-      p [label, my_ticket[i]]
-      xs << my_ticket[i]
+      res *= my_ticket[i]
     end
   end
-  p xs.inject(&:*)
-  #p cols.map { |l, _| l }
-
-  #require "pp"; pp possible_rules
-  return
-
-  until possible_rules.all? { |x| x.size == 1 }
-  end
-
-
-  col_names = []
-  0.upto(cols-1) do |i|
-    vals = ok_tix.map { |t| t[i] }
-    p i => vals
-    maybe_rules = all_rules.select { |label, rule| vals.all? { |val| rule === val } }
-    col_names << maybe_rules
-  end
-
-  require "pp"; pp col_names
-  return
-
-  prod = 1
-  my_ticket = ticket.split(",").map(&:to_i)
-  col_names.each_with_index do |name, i|
-    if name =~ /^departure/
-      p [name, i, my_ticket[i]]
-      prod *= my_ticket[i]
-    end
-  end
-
-  puts "part 2: #{prod}"
+  puts "part 2: #{res}"
 
 ensure
   bm_done
