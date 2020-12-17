@@ -7,14 +7,10 @@ trait Coords {
     fn offset(&self, d: i32) -> Self;
     fn upto(&self, other: &Self) -> Box<dyn Iterator<Item = Self>>;
 
-    fn neighbors(&self) -> Box<dyn Iterator<Item = Self> + '_>
-    where
-        Self: Sized + PartialEq,
-    {
+    fn neighbors(&self) -> Box<dyn Iterator<Item = Self>> where Self: Sized {
         let start = self.offset(-1);
         let stop = self.offset(1);
-        let range = start.upto(&stop);
-        Box::new(range.filter(move |c| c != self))
+        start.upto(&stop)
     }
 }
 
@@ -170,8 +166,7 @@ fn gol<C: Coords + Eq + Hash + std::fmt::Debug>(grid: &Grid<C>, c: &C) -> bool {
 }
 
 fn active_neighbors<C: Coords + Eq + Hash + std::fmt::Debug>(grid: &Grid<C>, c: &C) -> usize {
-    c.neighbors().into_iter().fold(0, |res, dc| {
-        /*println!("GOL {:?}", dc);*/
+    c.neighbors().filter(|x| x != c).fold(0, |res, dc| {
         res + match grid.get(&dc) {
             Some(&true) => 1,
             _ => 0,
@@ -192,9 +187,6 @@ fn parse_grid() -> Game<Coords3> {
                 '.' => false,
                 _ => panic!(">>> {:?}", c),
             };
-            //if v {
-            //    println!("ACTIVE: {:?}", c);
-            //}
             grid.insert(c, v);
             col = col + 1;
         }
