@@ -8,6 +8,18 @@ pub fn complex_number(real: i64, imaginary: i64) -> complex::Complex {
     complex::Complex { real, imaginary }
 }
 
+pub fn read_csv_line<T: FromStr>() -> Vec<T> {
+    let mut line = String::new();
+    io::stdin().read_line(&mut line).unwrap();
+    line.trim()
+        .split(",")
+        .map(|x| match x.parse() {
+            Ok(n) => n,
+            Err(_) => panic!("error parsing line {}", line),
+        })
+        .collect()
+}
+
 pub fn parse_lines<T>() -> ParseLines<T> {
     ParseLines::<T> {
         phantom: PhantomData,
