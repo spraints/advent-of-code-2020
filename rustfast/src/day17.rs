@@ -1,16 +1,52 @@
 use super::common;
 use std::collections::HashMap;
 use std::hash::Hash;
-use std::slice::Iter;
 
 trait Coords {
     fn offset(&self, d: i32) -> Self;
-    fn upto(&self, other: &Self) -> Box<dyn Iterator<Item = Self>>;
+    fn start_cursor(&self) -> Self;
+    fn step(&self, start: &Self, stop: &Self) -> Option<Self>
+    where
+        Self: Sized;
 
-    fn neighbors(&self) -> Box<dyn Iterator<Item = Self>> where Self: Sized {
+    fn upto(&self, other: &Self) -> Upto<Self>
+    where
+        Self: Sized + Copy,
+    {
+        Upto {
+            start: *self,
+            stop: *other,
+            cursor: self.start_cursor(),
+        }
+    }
+
+    fn neighbors(&self) -> Upto<Self>
+    where
+        Self: Sized + Copy,
+    {
         let start = self.offset(-1);
         let stop = self.offset(1);
         start.upto(&stop)
+    }
+}
+
+struct Upto<C: Sized> {
+    start: C,
+    stop: C,
+    cursor: C,
+}
+
+impl<C: Coords + Copy> Iterator for Upto<C> {
+    type Item = C;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        match self.cursor.step(&self.start, &self.stop) {
+            None => None,
+            Some(newcur) => {
+                self.cursor = newcur;
+                Some(self.cursor)
+            }
+        }
     }
 }
 
@@ -22,45 +58,32 @@ impl Coords for Coords3 {
         Self(self.0 + d, self.1 + d, self.2 + d)
     }
 
-    fn upto(&self, other: &Self) -> Box<dyn Iterator<Item = Self>> {
-        Box::new(Upto3 {
-            start: self.clone(),
-            stop: other.clone(),
-            cursor: Self(self.0, self.1, self.2 - 1),
-        })
+    fn start_cursor(&self) -> Self {
+        Self(self.0, self.1, self.2 - 1)
+    }
+
+    fn step(&self, start: &Self, stop: &Self) -> Option<Self> {
+        let mut newcur = *self;
+        newcur.2 = newcur.2 + 1;
+        if newcur.2 > stop.2 {
+            newcur.2 = start.2;
+            newcur.1 = newcur.1 + 1;
+        }
+        if newcur.1 > stop.1 {
+            newcur.1 = start.1;
+            newcur.0 = newcur.0 + 1;
+        }
+        if newcur.0 > stop.0 {
+            None
+        } else {
+            Some(newcur)
+        }
     }
 }
 
 impl Coords3 {
     fn to4(&self) -> Coords4 {
         Coords4(self.0, self.1, self.2, 0)
-    }
-}
-
-struct Upto3 {
-    start: Coords3,
-    stop: Coords3,
-    cursor: Coords3,
-}
-
-impl Iterator for Upto3 {
-    type Item = Coords3;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        self.cursor.2 = self.cursor.2 + 1;
-        if self.cursor.2 > self.stop.2 {
-            self.cursor.2 = self.start.2;
-            self.cursor.1 = self.cursor.1 + 1;
-        }
-        if self.cursor.1 > self.stop.1 {
-            self.cursor.1 = self.start.1;
-            self.cursor.0 = self.cursor.0 + 1;
-        }
-        if self.cursor.0 > self.stop.0 {
-            None
-        } else {
-            Some(self.cursor.clone())
-        }
     }
 }
 
@@ -72,42 +95,29 @@ impl Coords for Coords4 {
         Self(self.0 + d, self.1 + d, self.2 + d, self.3 + d)
     }
 
-    fn upto(&self, other: &Self) -> Box<dyn Iterator<Item = Self>> {
-        Box::new(Upto4 {
-            start: self.clone(),
-            stop: other.clone(),
-            cursor: Self(self.0, self.1, self.2, self.3 - 1),
-        })
+    fn start_cursor(&self) -> Self {
+        Self(self.0, self.1, self.2, self.3 - 1)
     }
-}
 
-struct Upto4 {
-    start: Coords4,
-    stop: Coords4,
-    cursor: Coords4,
-}
-
-impl Iterator for Upto4 {
-    type Item = Coords4;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        self.cursor.3 = self.cursor.3 + 1;
-        if self.cursor.3 > self.stop.3 {
-            self.cursor.3 = self.start.3;
-            self.cursor.2 = self.cursor.2 + 1;
+    fn step(&self, start: &Self, stop: &Self) -> Option<Self> {
+        let mut newcur = *self;
+        newcur.3 = newcur.3 + 1;
+        if newcur.3 > stop.3 {
+            newcur.3 = start.3;
+            newcur.2 = newcur.2 + 1;
         }
-        if self.cursor.2 > self.stop.2 {
-            self.cursor.2 = self.start.2;
-            self.cursor.1 = self.cursor.1 + 1;
+        if newcur.2 > stop.2 {
+            newcur.2 = start.2;
+            newcur.1 = newcur.1 + 1;
         }
-        if self.cursor.1 > self.stop.1 {
-            self.cursor.1 = self.start.1;
-            self.cursor.0 = self.cursor.0 + 1;
+        if newcur.1 > stop.1 {
+            newcur.1 = start.1;
+            newcur.0 = newcur.0 + 1;
         }
-        if self.cursor.0 > self.stop.0 {
+        if newcur.0 > stop.0 {
             None
         } else {
-            Some(self.cursor.clone())
+            Some(newcur)
         }
     }
 }
@@ -118,7 +128,7 @@ type Game<C> = (C, C, Grid<C>);
 pub fn run() {
     let mut grid3 = parse_grid();
     let mut grid4 = three2four(&grid3);
-    for i in (0..6) {
+    for _ in 0..6 {
         println!("---STEP3---");
         grid3 = step(grid3);
         println!("---STEP4---");
@@ -133,7 +143,9 @@ fn score<T>(game: &Game<T>) -> usize {
     grid.iter().fold(0, |n, (_, v)| n + if *v { 1 } else { 0 })
 }
 
-fn step<C: Coords + Eq + Hash + Copy + std::fmt::Debug>(grid: Game<C>) -> Game<C> {
+fn step<C: Coords + Eq + Hash + Copy + std::fmt::Debug + std::marker::Copy>(
+    grid: Game<C>,
+) -> Game<C> {
     let (min, max, grid) = grid;
     let min = min.offset(-1);
     let max = max.offset(1);
@@ -145,7 +157,7 @@ fn step<C: Coords + Eq + Hash + Copy + std::fmt::Debug>(grid: Game<C>) -> Game<C
     (min, max, newgrid)
 }
 
-fn gol<C: Coords + Eq + Hash + std::fmt::Debug>(grid: &Grid<C>, c: &C) -> bool {
+fn gol<C: Coords + Eq + Hash + std::fmt::Debug + std::marker::Copy>(grid: &Grid<C>, c: &C) -> bool {
     let an = active_neighbors(grid, c);
     match grid.get(c) {
         Some(&true) => {
@@ -165,7 +177,10 @@ fn gol<C: Coords + Eq + Hash + std::fmt::Debug>(grid: &Grid<C>, c: &C) -> bool {
     }
 }
 
-fn active_neighbors<C: Coords + Eq + Hash + std::fmt::Debug>(grid: &Grid<C>, c: &C) -> usize {
+fn active_neighbors<C: Coords + Eq + Hash + std::fmt::Debug + std::marker::Copy>(
+    grid: &Grid<C>,
+    c: &C,
+) -> usize {
     c.neighbors().filter(|x| x != c).fold(0, |res, dc| {
         res + match grid.get(&dc) {
             Some(&true) => 1,
