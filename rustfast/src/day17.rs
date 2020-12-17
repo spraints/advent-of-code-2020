@@ -1,67 +1,155 @@
 use super::common;
 use std::collections::HashMap;
+use std::hash::Hash;
+use std::slice::Iter;
 
-type Coords = (i32, i32, i32, i32);
-type Grid = HashMap<Coords, bool>;
-type Game = (Coords, Coords, Grid);
+trait Coords {
+    fn offset(&self, d: i32) -> Self;
+    fn upto(&self, other: &Self) -> Box<dyn Iterator<Item = Self>>;
+
+    fn neighbors(&self) -> Box<dyn Iterator<Item = Self> + '_>
+    where
+        Self: Sized + PartialEq,
+    {
+        let start = self.offset(-1);
+        let stop = self.offset(1);
+        let range = start.upto(&stop);
+        Box::new(range.filter(move |c| c != self))
+    }
+}
+
+#[derive(Hash, PartialEq, Eq, Debug, Copy, Clone)]
+struct Coords3(i32, i32, i32);
+
+impl Coords for Coords3 {
+    fn offset(&self, d: i32) -> Self {
+        Self(self.0 + d, self.1 + d, self.2 + d)
+    }
+
+    fn upto(&self, other: &Self) -> Box<dyn Iterator<Item = Self>> {
+        Box::new(Upto3 {
+            start: self.clone(),
+            stop: other.clone(),
+            cursor: Self(self.0, self.1, self.2 - 1),
+        })
+    }
+}
+
+impl Coords3 {
+    fn to4(&self) -> Coords4 {
+        Coords4(self.0, self.1, self.2, 0)
+    }
+}
+
+struct Upto3 {
+    start: Coords3,
+    stop: Coords3,
+    cursor: Coords3,
+}
+
+impl Iterator for Upto3 {
+    type Item = Coords3;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        self.cursor.2 = self.cursor.2 + 1;
+        if self.cursor.2 > self.stop.2 {
+            self.cursor.2 = self.start.2;
+            self.cursor.1 = self.cursor.1 + 1;
+        }
+        if self.cursor.1 > self.stop.1 {
+            self.cursor.1 = self.start.1;
+            self.cursor.0 = self.cursor.0 + 1;
+        }
+        if self.cursor.0 > self.stop.0 {
+            None
+        } else {
+            Some(self.cursor.clone())
+        }
+    }
+}
+
+#[derive(Hash, PartialEq, Eq, Debug, Copy, Clone)]
+struct Coords4(i32, i32, i32, i32);
+
+impl Coords for Coords4 {
+    fn offset(&self, d: i32) -> Self {
+        Self(self.0 + d, self.1 + d, self.2 + d, self.3 + d)
+    }
+
+    fn upto(&self, other: &Self) -> Box<dyn Iterator<Item = Self>> {
+        Box::new(Upto4 {
+            start: self.clone(),
+            stop: other.clone(),
+            cursor: Self(self.0, self.1, self.2, self.3 - 1),
+        })
+    }
+}
+
+struct Upto4 {
+    start: Coords4,
+    stop: Coords4,
+    cursor: Coords4,
+}
+
+impl Iterator for Upto4 {
+    type Item = Coords4;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        self.cursor.3 = self.cursor.3 + 1;
+        if self.cursor.3 > self.stop.3 {
+            self.cursor.3 = self.start.3;
+            self.cursor.2 = self.cursor.2 + 1;
+        }
+        if self.cursor.2 > self.stop.2 {
+            self.cursor.2 = self.start.2;
+            self.cursor.1 = self.cursor.1 + 1;
+        }
+        if self.cursor.1 > self.stop.1 {
+            self.cursor.1 = self.start.1;
+            self.cursor.0 = self.cursor.0 + 1;
+        }
+        if self.cursor.0 > self.stop.0 {
+            None
+        } else {
+            Some(self.cursor.clone())
+        }
+    }
+}
+
+type Grid<C> = HashMap<C, bool>;
+type Game<C> = (C, C, Grid<C>);
 
 pub fn run() {
-    let mut grid = parse_grid();
-    pg(&grid);
+    let mut grid3 = parse_grid();
+    let mut grid4 = three2four(&grid3);
     for i in (0..6) {
-        println!("---STEP---");
-        grid = step(grid);
-        pg(&grid);
+        println!("---STEP3---");
+        grid3 = step(grid3);
+        println!("---STEP4---");
+        grid4 = step(grid4);
     }
-    let active = grid
-        .2
-        .iter()
-        .fold(0, |n, (_, v)| n + if *v { 1 } else { 0 });
-    // 560 is too high.
-    println!("part 1: {}", active);
+    println!("part 1: {}", score(&grid3)); // expect 322
+    println!("part 2: {}", score(&grid4)); // expect 2000
 }
 
-fn pg(grid: &Game) {
-    let (min, max, grid) = grid;
-    for z in (min.2..=max.2) {
-        for w in (min.3..=max.3) {
-            println!("z = {}, w = {}", z, w);
-            for row in (min.0..=max.0) {
-                for col in (min.1..=max.1) {
-                    match grid.get(&(row, col, z, w)) {
-                        Some(&true) => print!("#"),
-                        _ => print!("."),
-                    }
-                }
-                println!("");
-            }
-        }
-    }
+fn score<T>(game: &Game<T>) -> usize {
+    let (_, _, grid) = game;
+    grid.iter().fold(0, |n, (_, v)| n + if *v { 1 } else { 0 })
 }
 
-fn step(grid: Game) -> Game {
+fn step<C: Coords + Eq + Hash + Copy + std::fmt::Debug>(grid: Game<C>) -> Game<C> {
     let (min, max, grid) = grid;
-    let min = add(&min, (-1, -1, -1, -1));
-    let max = add(&max, (1, 1, 1, 1));
+    let min = min.offset(-1);
+    let max = max.offset(1);
     let mut newgrid = Grid::new();
-    for z in (min.2..=max.2) {
-        for w in (min.3..=max.3) {
-            for row in (min.0..=max.0) {
-                for col in (min.1..=max.1) {
-                    let c = (row, col, z, w);
-                    let v = gol(&grid, &c);
-                    if v {
-                        println!("ACTIVE: {:?}", c);
-                    }
-                    newgrid.insert(c, v);
-                }
-            }
-        }
+    for c in min.upto(&max) {
+        let v = gol(&grid, &c);
+        newgrid.insert(c.clone(), v);
     }
     (min, max, newgrid)
 }
 
-fn gol(grid: &Grid, c: &Coords) -> bool {
+fn gol<C: Coords + Eq + Hash + std::fmt::Debug>(grid: &Grid<C>, c: &C) -> bool {
     let an = active_neighbors(grid, c);
     match grid.get(c) {
         Some(&true) => {
@@ -81,39 +169,24 @@ fn gol(grid: &Grid, c: &Coords) -> bool {
     }
 }
 
-fn active_neighbors(grid: &Grid, c: &Coords) -> usize {
-    let mut res = 0;
-    for dx in (-1..=1) {
-        for dy in (-1..=1) {
-            for dz in (-1..=1) {
-                for dw in (-1..=1) {
-                    if dx != 0 || dy != 0 || dz != 0 || dw != 0 {
-                        let dc = add(c, (dx, dy, dz, dw));
-                        match grid.get(&dc) {
-                            Some(&true) => res = res + 1,
-                            _ => (),
-                        };
-                    }
-                }
-            }
+fn active_neighbors<C: Coords + Eq + Hash + std::fmt::Debug>(grid: &Grid<C>, c: &C) -> usize {
+    c.neighbors().into_iter().fold(0, |res, dc| {
+        /*println!("GOL {:?}", dc);*/
+        res + match grid.get(&dc) {
+            Some(&true) => 1,
+            _ => 0,
         }
-    }
-    //println!("{:?} => {}", c, res);
-    res
+    })
 }
 
-fn add(c1: &Coords, c2: Coords) -> Coords {
-    (c1.0 + c2.0, c1.1 + c2.1, c1.2 + c2.2, c1.3 + c2.3)
-}
-
-fn parse_grid() -> Game {
-    let mut grid = HashMap::new();
+fn parse_grid() -> Game<Coords3> {
+    let mut grid = Grid::new();
     let mut row = 0;
     let mut maxcol = 0;
     for s in common::parse_lines::<String>() {
         let mut col = 0;
         for ch in s.trim().chars() {
-            let c = (row, col, 0, 0);
+            let c = Coords3(row, col, 0);
             let v = match ch {
                 '#' => true,
                 '.' => false,
@@ -128,5 +201,18 @@ fn parse_grid() -> Game {
         maxcol = if col > maxcol { col - 1 } else { maxcol };
         row = row + 1;
     }
-    ((0, 0, 0, 0), (row - 1, maxcol, 0, 0), grid)
+    (Coords3(0, 0, 0), Coords3(row - 1, maxcol, 0), grid)
+}
+
+fn three2four(game3: &Game<Coords3>) -> Game<Coords4> {
+    let (min, max, grid) = game3;
+    (min.to4(), max.to4(), to4(grid))
+}
+
+fn to4(grid3: &Grid<Coords3>) -> Grid<Coords4> {
+    let mut res = Grid::new();
+    for (k, v) in grid3 {
+        res.insert(k.to4(), *v);
+    }
+    res
 }
