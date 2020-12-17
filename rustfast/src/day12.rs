@@ -84,7 +84,7 @@ pub fn run() {
                 p1_pos = p1_pos + p1_dir * inst.magnitude;
                 p2_pos = p2_pos + p2_way * inst.magnitude;
             }
-            c => {
+            _ => {
                 panic!("unrecognized: {:?}", inst);
             }
         };
