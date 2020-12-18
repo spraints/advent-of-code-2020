@@ -3,21 +3,17 @@ require_relative "./lib"
 def main(input)
   bm "parse"
 
+  parsed = input.lines.map { |line| parse_line(line) }
+
   bm "part 1"
 
-  sum = 0
-  input.lines.each do |line|
-    sum += do_math(line.strip)
-  end
+  sum = parsed.inject(0) { |sum, line| sum + eval_part1(line) }
 
   puts "part 1: #{sum}"
 
   bm "part 2"
 
-  sum = 0
-  input.lines.each do |line|
-    sum += do_math2(line.strip)
-  end
+  sum = parsed.inject(0) { |sum, line| sum + eval_part2(line) }
 
   puts "part 2: #{sum}"
 
@@ -25,103 +21,67 @@ ensure
   bm_done
 end
 
-def do_math2(line)
-  #puts line
-  tokens = line.scan(/\(|\)|\d+|\+|\*/)
+def parse_line(line)
+  res = []
   stack = []
-  cur = []
-  tokens.each do |t|
-    #p t
+  line.scan(/\(|\)|\d+|\+|\*/).each do |t|
     case t
     when '('
-      stack << cur
-      cur = []
+      stack << res
+      res = []
     when ')'
-      oldcur = stack.pop
-      oldcur << cur
-      cur = oldcur
+      outer = stack.pop
+      outer << res.freeze
+      res = outer
     when '+', '*'
-      cur << t
+      res << t
     else
-      cur << t.to_i
+      res << t.to_i
     end
-    #p cur: cur, stack: stack
   end
-  make_math(cur)
+  res.freeze
 end
 
-def make_math(tokens)
+def eval_part2(tokens)
   case tokens
   when Numeric
-    p number: tokens
     tokens
   else
-    p evalme: tokens
-    tokens2 = [make_math(tokens.shift)]
+    tokens = tokens.dup
+    factors = [eval_part2(tokens.shift)]
     until tokens.empty?
       raise "not enough #{tokens.inspect}" if tokens.size < 2
       op = tokens.shift
-      val = make_math(tokens.shift)
+      val = eval_part2(tokens.shift)
       if op == "+"
-        tokens2.push(tokens2.pop + val)
+        factors.push(factors.pop + val)
       else
-        tokens2 << val
+        factors << val
       end
     end
-    p prod: tokens2
-    tokens2.inject(&:*)
+    factors.inject(&:*)
   end
 end
 
-def do_math(line)
-  stack = []
-  res = nil
-  op = nil
-  #puts line
-  line.scan(/\(|\)|\d+|\+|\*/).each do |x|
-    #p x: x, res: res, op: op, stack: stack
-    case x
-    when '('
-      stack.push res, op
-      res = op = nil
-    when ')'
-      raise "expect no op here #{op.inspect}" unless op.nil?
-      inres = res
-      op = stack.pop
-      res = stack.pop
-      case op
-      when '+'
-        res = res + inres
-      when '*'
-        res = res * inres
-      when nil
-        res = inres
+def eval_part1(tokens)
+  case tokens
+  when Numeric
+    tokens
+  else
+    tokens = tokens.dup
+    res = eval_part1(tokens.shift)
+    until tokens.empty?
+      raise "not enough #{tokens.inspect}" if tokens.size < 2
+      op = tokens.shift
+      val = eval_part1(tokens.shift)
+      if op == "+"
+        res += val
       else
-        raise op.inspect
+        res *= val
       end
-      op = nil
-    when '+', '*'
-      op = x
-    when /\d+/
-      if res.nil?
-        res = x.to_i
-      else
-        case op
-        when '+'
-          res += x.to_i
-        when '*'
-          res *= x.to_i
-        else
-          raise "unknown op #{op.inspect}"
-        end
-        op = nil
-      end
-    else
-      raise "wat #{x.inspect} (#{line.inspect})"
     end
+    res
   end
-  #puts "=> #{res}"
-  res
 end
 
 main($stdin.read)
