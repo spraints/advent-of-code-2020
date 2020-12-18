@@ -33,11 +33,13 @@ where
     let (mut p1, mut p2) = (0, 0xffffffff);
     loop {
         match line(stream)? {
-            Line::EOF => return Ok(if p1 > 0 {
-                Some((count(p1, 0), count(p2, 0)))
-            } else {
-                None
-            }),
+            Line::EOF => {
+                return Ok(if p1 > 0 {
+                    Some((count(p1, 0), count(p2, 0)))
+                } else {
+                    None
+                })
+            }
             Line::EOG => return Ok(Some((count(p1, 0), count(p2, 0)))),
             Line::Resp(b) => {
                 p1 = p1 | b;
