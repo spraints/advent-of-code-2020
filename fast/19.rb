@@ -17,9 +17,7 @@ def main(input)
 
   bm "part 1"
 
-  puts "part 1: #{messages.select { |m| rules_match?(rules, m.strip.chars) }.size}"
-  #sum = parsed.inject(0) { |sum, line| sum + eval_part1(line) }
-  #puts "part 1: #{sum}"
+  puts "part 1: #{messages.count { |m| rules_match?(rules, m.strip.chars) }}"
 
   bm "part 2"
 
@@ -32,10 +30,7 @@ def main(input)
     rules[label] = rule
   end
 
-  puts "part 2: #{messages.select { |m| rules_match?(rules, m.strip.chars) }.size}"
-
-  #sum = parsed.inject(0) { |sum, line| sum + eval_part2(line) }
-  #puts "part 2: #{sum}"
+  puts "part 3: #{messages.count { |m| rules_match?(rules, m.strip.chars) }}"
 
 ensure
   bm_done
