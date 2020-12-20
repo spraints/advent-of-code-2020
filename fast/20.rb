@@ -7,6 +7,10 @@ def main(input)
   #p tiles
 
   bm "part 1"
+  sols = {
+    22878471088273 => "IN!",
+    20899048083289 => "SAMPLE!",
+  }
 
   dim = Math.sqrt(tiles.size).to_i
   filled = fill([], dim: dim, tiles: tiles, row: 0, col: 0, used: {})
@@ -16,21 +20,21 @@ def main(input)
     filled[-1][-1].first,
     filled[-1][0].first,
   ]
-  p corners
-  puts "part 1: #{corners.map(&:to_i).inject(&:*)} (sample should be 20899048083289)"
+  part1 = corners.map(&:to_i).inject(&:*)
+  puts "part 1: #{part1} #{sols[part1]}"
 
   bm "part 2"
+  sols2 = {
+    273 => "SAMPLE!",
+    1680 => "IN!",
+  }
 
-  #image = filled.flat_map { |row| render(row, trim: false) }
-  #puts image
-  #puts "-----"
   image = filled.flat_map { |row| render(row, trim: true) }
   each_rotation2(image) do |i|
     if res = color_monsters(i)
       _, found = res
-      puts found.inspect
-      # 2115 is too high
-      puts "part 3: #{i.inject(-found.size * MONSTER.size) { |sum, row| sum + row.scan(/#/).size }}"
+      part2 = i.inject(-found.size * MONSTER.size) { |sum, row| sum + row.scan(/#/).size }
+      puts "part 2: #{part2} #{sols2[part2]}"
     end
   end
 
