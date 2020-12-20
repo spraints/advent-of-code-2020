@@ -23,34 +23,40 @@ pub fn run() {
 
 fn satisfies_rule(msg: &str, rules: &HashMap<RuleRef, Rule>, rule: RuleRef) -> bool {
     let rule = &rules[&rule];
-    rule.satisfied(msg, rules, |rest| rest.len() == 0)
+    rule.satisfied(msg, rules, Vec::new())
 }
 
 impl Rule {
-    fn satisfied<F: Fn(&str) -> bool>(&self, msg: &str, rules: &HashMap<RuleRef, Rule>, f: F) -> bool {
+    fn satisfied(&self, msg: &str, rules: &HashMap<RuleRef, Rule>, more: Vec<RuleRef>) -> bool {
         match self {
-            Rule::A => Self::must_start_with(msg, 'a', f),
-            Rule::B => Self::must_start_with(msg, 'b', f),
-            Rule::Refs(opts) => opts.iter().any(|opt| Self::check_rec(msg, opt, 0, rules, |rest| f(rest))),
+            Rule::A => Self::must_start_with(msg, 'a', rules, more),
+            Rule::B => Self::must_start_with(msg, 'b', rules, more),
+            Rule::Refs(opts) => opts.iter().any(|opt| Self::check_opt(msg, rules, opt, &more))
         }
     }
 
-    fn check_rec<F: Fn(&str) -> bool>(msg: &str, opt: &Vec<RuleRef>, i: usize, rules: &HashMap<RuleRef, Rule>, f: F) -> bool {
-        match opt.get(i) {
-            None => f(msg),
+    fn check_opt(msg: &str, rules: &HashMap<RuleRef, Rule>, opt: &Vec<RuleRef>, more: &Vec<RuleRef>) -> bool {
+        let more2 = opt.iter().copied().chain(more.iter().copied()).collect();
+        Self::check_rules(msg, rules, more2)
+    }
+
+    fn check_rules(msg: &str, rules: &HashMap<RuleRef, Rule>, more: Vec<RuleRef>) -> bool {
+        let mut more = more.into_iter();
+        match more.next() {
+            None => msg.len() == 0,
             Some(rr) => {
-                let rule = &rules[rr];
-                rule.satisfied(msg, rules, |rest| Self::check_rec(msg, opt, i, rules, |rest| f(rest)))
-            }
+                let rule = &rules[&rr];
+                rule.satisfied(msg, rules, more.collect())
+            },
         }
     }
 
-    fn must_start_with<F: Fn(&str) -> bool>(msg: &str, c: char, f: F) -> bool {
+    fn must_start_with(msg: &str, c: char, rules: &HashMap<RuleRef, Rule>, more: Vec<RuleRef>) -> bool {
         let mut msg = msg.chars();
         match msg.next() {
             None => false,
             Some(cc) => if c == cc {
-                f(msg.as_str())
+                Self::check_rules(msg.as_str(), rules, more)
             } else {
                 false
             }
