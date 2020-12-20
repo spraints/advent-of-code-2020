@@ -20,6 +20,45 @@ pub fn read_csv_line<T: FromStr>() -> Vec<T> {
         .collect()
 }
 
+pub enum Token {
+    Number(i64),
+    Word(String),
+}
+
+pub fn tok<R: Read>(r: R) -> Option<Token> {
+    let mut buf = [0;1];
+    let mut res = None;
+    loop {
+        let n = r.read(&mut buf).unwrap();
+        if n == 0 {
+            return res;
+        }
+        res = match res {
+            None => if buf[0].is_ascii_digit() {
+                Some(Token::Number(buf[0] - b'0'))
+            } else if !buf[0].is_ascii_whitespace() {
+                Some(Token::String(String::from(buf)))
+            } else {
+                None
+            },
+            Some(val) => {
+                if buf[0].is_ascii_whitespace() {
+                return res;
+                }
+                Some(match val {
+                    Token::Number(val) => Token::Number(val * 10 + (buf[0] - b'0')),
+                    Token::String(val) => Token::Number(val * 10 + (buf[0] - b'0')),
+                })
+            Some(Token::Number(val)) => if buf[0].is_ascii_whitespace() {
+                return res
+            } else {
+                Some(Token::Number(val * 10 + (buf[0] - b'0')))
+            },
+            Some(Token::String(val)) => if 
+        }
+    }
+}
+
 pub fn parse_i64(c: &mut std::str::Chars) -> (Option<i64>, Option<char>) {
     let mut any = false;
     let mut res = 0;
