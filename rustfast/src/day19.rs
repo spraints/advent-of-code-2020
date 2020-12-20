@@ -1,5 +1,6 @@
 use super::common;
 use std::io;
+use std::collections::HashMap;
 
 type RuleRef = usize;
 
@@ -14,19 +15,57 @@ struct RuleLine(RuleRef, Rule);
 pub fn run() {
     let stdin = io::stdin();
     let rules: Vec<RuleLine> = common::parse_lines_before_break().collect();
+    let rules: HashMap<_, _> = rules.into_iter().map(|RuleLine(a,b)| (a,b)).collect();
     let messages: Vec<String> = common::parse_lines().collect();
-    println!("rules:{} messages:{}", rules.len(), messages.len());
+
+    println!("part 1: {}", messages.iter().filter(|msg| satisfies_rule(msg.trim(), &rules, 0)).count());
+}
+
+fn satisfies_rule(msg: &str, rules: &HashMap<RuleRef, Rule>, rule: RuleRef) -> bool {
+    let rule = &rules[&rule];
+    rule.satisfied(msg, rules, |rest| rest.len() == 0)
+}
+
+impl Rule {
+    fn satisfied<F: Fn(&str) -> bool>(&self, msg: &str, rules: &HashMap<RuleRef, Rule>, f: F) -> bool {
+        match self {
+            Rule::A => Self::must_start_with(msg, 'a', f),
+            Rule::B => Self::must_start_with(msg, 'b', f),
+            Rule::Refs(opts) => opts.iter().any(|opt| Self::check_rec(msg, opt, 0, rules, |rest| f(rest))),
+        }
+    }
+
+    fn check_rec<F: Fn(&str) -> bool>(msg: &str, opt: &Vec<RuleRef>, i: usize, rules: &HashMap<RuleRef, Rule>, f: F) -> bool {
+        match opt.get(i) {
+            None => f(msg),
+            Some(rr) => {
+                let rule = &rules[rr];
+                rule.satisfied(msg, rules, |rest| Self::check_rec(msg, opt, i, rules, |rest| f(rest)))
+            }
+        }
+    }
+
+    fn must_start_with<F: Fn(&str) -> bool>(msg: &str, c: char, f: F) -> bool {
+        let mut msg = msg.chars();
+        match msg.next() {
+            None => false,
+            Some(cc) => if c == cc {
+                f(msg.as_str())
+            } else {
+                false
+            }
+        }
+    }
 }
 
 impl std::str::FromStr for RuleLine {
     type Err = ();
 
     fn from_str(line: &str) -> Result<Self, Self::Err> {
-        let mut line = line.chars();
-        let (rule_number, _ /* ':' */) = common::parse_i64(&mut line);
-        line.next().unwrap(); // ' '
-        let rule = line.as_str().parse().unwrap();
-        Ok(Self(rule_number.unwrap() as RuleRef, rule))
+        let mut parts = line.split(|c| c == ':');
+        let rule_ref = parts.next().unwrap().parse().unwrap();
+        let rule = parts.next().unwrap().parse().unwrap();
+        Ok(RuleLine(rule_ref, rule))
     }
 }
 
@@ -34,76 +73,34 @@ impl std::str::FromStr for Rule {
     type Err = ();
 
     fn from_str(line: &str) -> Result<Self, Self::Err> {
-        let mut state = RuleParseState::Init;
-        for c in line.chars() {
-            state = state.next(c);
+        let mut parts = line.split(|c| c == ' ');
+        assert_eq!("", parts.next().unwrap());
+        let mut part = parts.next().unwrap();
+        if part == "\"a\"" {
+            return Ok(Self::A);
         }
-        Ok(state.res())
-    }
-}
-
-enum RuleParseState {
-    Init,
-    Rule1Num1(RuleRef),
-    Rule1Num1Done(RuleRef),
-    Rule1Num2(RuleRef, RuleRef),
-    Rule2Init(Vec<RuleRef>),
-    StartLiteral,
-    LiteralA,
-    LiteralB,
-}
-
-impl RuleParseState {
-    fn next(self, c: char) -> Self {
-        println!("{:?}", c);
-        match self {
-            RuleParseState::Init => {
-                if let Some(d) = c.to_digit(10) {
-                    RuleParseState::Rule1Num1(d as RuleRef)
-                } else if c == '"' {
-                    RuleParseState::StartLiteral
-                } else {
-                    panic!("unknown {:?}", c)
-                }
-            }
-            RuleParseState::StartLiteral => {
-                match c {
-                    'a' => RuleParseState::LiteralA,
-                    'b' => RuleParseState::LiteralB,
-                    _ => panic!("unknown literal {:?}", c),
-                }
-            },
-            RuleParseState::Rule1Num1(z) => {
-                if let Some(d) = c.to_digit(10) {
-                    let z = z * 10 + (d as RuleRef);
-                    RuleParseState::Rule1Num1(z)
-                } else if c == ' ' {
-                    RuleParseState::Rule1Num1Done(z)
-                } else {
-                    todo!()
-                }
-            },
-            RuleParseState::Rule1Num1Done(z) => {
-                if c == '|' {
-                    RuleParseState::Rule2Init(vec![z])
-                } else if let Some(d) = c.to_digit(10) {
-                    RuleParseState::Rule1Num2(z, d as RuleRef)
-                } else {
-                    todo!()
-                }
-            }
-            RuleParseState::Rule1Num2(_, _) => todo!(),
-            RuleParseState::Rule2Init(_) => todo!(),
-            RuleParseState::LiteralA => RuleParseState::LiteralA,
-            RuleParseState::LiteralB => RuleParseState::LiteralB,
+        if part == "\"b\"" {
+            return Ok(Self::B);
         }
-    }
-
-    fn res(self) -> Rule {
-        match self {
-            RuleParseState::LiteralA => Rule::A,
-            RuleParseState::LiteralB => Rule::B,
-            _ => todo!(),
+        let mut opt = Vec::new();
+        let mut res = Vec::new();
+        loop {
+            if part == "|" {
+                res.push(opt);
+                opt = Vec::new();
+            } else {
+                let val = part.parse().unwrap();
+                opt.push(val);
+            }
+            match parts.next() {
+                None => {
+                    res.push(opt);
+                    return Ok(Self::Refs(res));
+                }
+                Some(s) => {
+                    part = s;
+                }
+            };
         }
     }
 }
