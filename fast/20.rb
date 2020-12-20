@@ -21,22 +21,82 @@ def main(input)
 
   bm "part 2"
 
-  filled.each do |row|
-    print_row(row)
+  #image = filled.flat_map { |row| render(row, trim: false) }
+  #puts image
+  #puts "-----"
+  image = filled.flat_map { |row| render(row, trim: true) }
+  each_rotation2(image) do |i|
+    if res = color_monsters(i)
+      _, found = res
+      puts found.inspect
+      # 2115 is too high
+      puts "part 3: #{i.inject(-found.size * MONSTER.size) { |sum, row| sum + row.scan(/#/).size }}"
+    end
   end
-  #puts "part 3: #{messages.count { |m| rules_match?(rules, m.strip.chars) }}"
 
 ensure
   bm_done
 end
 
-def print_row(row)
-  tile_height = row.first[1][:raw].size
-  tiles = row.map { |_, tile, _| orient(**tile) }
-  tile_height.times do |i|
-    puts tiles.map { |tile| tile[i] }.join(" ")
+#             1111111111
+#   01234567890123456789
+# 0:                  # 
+# 1:#    ##    ##    ###
+# 2: #  #  #  #  #  #   
+MONSTER = [
+  [0, 18],
+  [1, 0],
+  [1, 5],
+  [1, 6],
+  [1, 11],
+  [1, 12],
+  [1, 17],
+  [1, 18],
+  [1, 19],
+  [2, 1],
+  [2, 4],
+  [2, 7],
+  [2, 10],
+  [2, 13],
+  [2, 16],
+]
+def color_monsters(img)
+  dim = img.size
+  row = 0
+  found = []
+  while row + 3 < dim
+    col = 0
+    while col + 19 < dim
+      if MONSTER.all? { |r,c| img[row + r][col + c] == "#" }
+        found << [row, col]
+      end
+      col += 1
+    end
+    row += 1
   end
-  puts ""
+  return nil if found.empty?
+  [img, found]
+  #found.each do |row, col|
+  #  MONSTER.each do |r, c|
+  #    img[row + r][col + c] = "O"
+  #  end
+  #end
+  #img
+end
+
+def render(row, trim:)
+  tiles = trim ?
+    row.map { |_, tile, _| trim_edges(orient(**tile)) } :
+    row.map { |_, tile, _| orient(**tile) }
+
+  t = tiles.shift
+  res = t.zip(*tiles).map { |line| line.join(trim ? "" : " ") }
+  res << [""] unless trim
+  res
+end
+
+def trim_edges(raw_tile)
+  raw_tile[1..-2].map { |line| line[1..-2] }
 end
 
 def fill(filled, dim:, tiles:, row:, col:, used:)
@@ -74,6 +134,21 @@ def each_rotation(tile)
     # rot counter-clockwise
     yield tile, {step: i, rev: true}
     tile.push tile.shift
+  end
+end
+
+def each_rotation2(raw)
+  4.times do |i|
+    yield raw
+    # rot counter-clockwise
+    raw = raw.size.times.map { |i| raw.map { |row| row[i] }.join }.reverse
+  end
+  # flip top-right to bottom-left
+  raw = raw.size.times.map { |i| raw.map { |row| row[i] }.join }
+  4.times do |i|
+    yield raw
+    # rot counter-clockwise
+    raw = raw.size.times.map { |i| raw.map { |row| row[i] }.join }.reverse
   end
 end
 
