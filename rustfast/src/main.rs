@@ -4,6 +4,8 @@ mod common;
 mod day12;
 mod day15;
 mod day17;
+mod day18;
+mod day19;
 
 fn main() {
     let mut args = env::args();
@@ -14,6 +16,8 @@ fn main() {
             "day12" => day12::run(),
             "day15" => day15::run(),
             "day17" => day17::run(),
+            "day18" => day18::run(),
+            "day19" => day19::run(),
             _ => println!("error: '{}' is not a known program", arg),
         },
     };
