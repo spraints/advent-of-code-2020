@@ -90,8 +90,8 @@ end
 
 def render(row, trim:)
   tiles = trim ?
-    row.map { |_, tile, _| trim_edges(orient(**tile)) } :
-    row.map { |_, tile, _| orient(**tile) }
+    row.map { |_, tile, _| trim_edges(tile.fetch(:rotated)) } :
+    row.map { |_, tile, _| tile.fetch(:rotated) }
 
   t = tiles.shift
   res = t.zip(*tiles).map { |line| line.join(trim ? "" : " ") }
@@ -110,7 +110,7 @@ def fill(filled, dim:, tiles:, row:, col:, used:)
       if !used.key?(id)
         each_rotation(tile) do |rtile, rot|
           if can_place?(grid: filled, tile: rtile, row: row, col: col)
-            if res = fill(add_to_grid(filled, [id, {raw: tile}.merge(rot), rtile], row: row, col: col), dim: dim, tiles: tiles, row: row, col: col + 1, used: used.merge(id => true))
+            if res = fill(add_to_grid(filled, [id, rot, rtile], row: row, col: col), dim: dim, tiles: tiles, row: row, col: col + 1, used: used.merge(id => true))
               return res
             end
           end
@@ -127,7 +127,7 @@ end
 
 def each_rotation(tile)
   each_rotation2(tile) do |t, rot|
-    yield get_edges(t), rot
+    yield get_edges(t), rot.merge(rotated: t)
   end
 end
 
@@ -141,21 +141,6 @@ def each_rotation2(raw)
   raw = raw.size.times.map { |i| raw.map { |row| row[i] }.join }
   4.times do |i|
     yield raw, {step: i, rev: true}
-    # rot counter-clockwise
-    raw = raw.size.times.map { |i| raw.map { |row| row[i] }.join }.reverse
-  end
-end
-
-def orient(raw:, step:, rev:, **)
-  4.times do |i|
-    return raw if i == step && !rev
-    # rot counter-clockwise
-    raw = raw.size.times.map { |i| raw.map { |row| row[i] }.join }.reverse
-  end
-  # flip top-right to bottom-left
-  raw = raw.size.times.map { |i| raw.map { |row| row[i] }.join }
-  4.times do |i|
-    return raw if i == step
     # rot counter-clockwise
     raw = raw.size.times.map { |i| raw.map { |row| row[i] }.join }.reverse
   end
