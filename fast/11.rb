@@ -2,6 +2,7 @@ require_relative "./lib"
 
 def main(input)
   bm "parse"
+  bm_size input.lines.size
 
   input = input.lines.map(&:strip).map(&:chars)
 
@@ -47,6 +48,7 @@ def fill_seats(chart, tol:, part2:)
   step = chart.map(&:dup)
   chart.each_with_index do |line, i|
     line.each_with_index do |seat, j|
+      bm_step
       next if seat == "."
       occ = neighbors(chart, i, j, skip_empty_space: part2)
       #puts "#{i},#{j}=#{seat} #{occ}"
@@ -78,6 +80,7 @@ def neighbors(chart, x, y, skip_empty_space: false)
   DIRECTIONS.each do |dx, dy|
     nx, ny = x + dx, y + dy
     while nx >= 0 && nx < maxx && ny >= 0 && ny < maxy
+      bm_step
       case chart[nx][ny]
       when "L"
         break

@@ -3,6 +3,7 @@ require "set"
 
 def main(input)
   #bm "parse"
+  bm_size input.lines.size
 
   bm "part 1"
 
@@ -14,6 +15,7 @@ def main(input)
     allergens = $2.split(", ")
     all_ingredients += ingredients
     allergens.each do |a|
+      bm_step
       if y = possible_allergens[a]
         possible_allergens[a] = y & ingredients
       else
@@ -26,6 +28,7 @@ def main(input)
   until possible_allergens.empty?
     np = {}
     possible_allergens.sort_by { |a, b| b.size }.each do |a, i|
+      bm_step
       j = i - bad.keys
       if j.size == 0
         raise "impossible #{[a, i, j, bad].inspect}"

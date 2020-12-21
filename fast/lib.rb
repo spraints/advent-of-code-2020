@@ -29,8 +29,12 @@ def sum3(arr, sum:)
 end
 
 $bms = []
+$bm_size = 0
+$bm_step = "init"
+$bm_steps = Hash.new { |h,k| h[k] = 0 }
 
 def bm(label)
+  $bm_step = label
   $bms << [label, Process.clock_gettime(Process::CLOCK_MONOTONIC)]
 end
 
@@ -39,6 +43,18 @@ def bm_done
   $bms.each_cons(2) do |start, stop|
     label, start = start
     _, stop = stop
-    printf "%20s %9.3fms\n", label, 1000.0 * (stop - start)
+    if $bm_steps.key?(label)
+      printf "%20s %9.3fms (%d -> %d steps)\n", label, 1000.0 * (stop - start), $bm_size, $bm_steps[label]
+    else
+      printf "%20s %9.3fms\n", label, 1000.0 * (stop - start)
+    end
   end
+end
+
+def bm_size(n)
+  $bm_size = n
+end
+
+def bm_step
+  $bm_steps[$bm_step] += 1
 end

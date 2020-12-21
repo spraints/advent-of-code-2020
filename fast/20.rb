@@ -2,6 +2,7 @@ require_relative "./lib"
 
 def main(input)
   bm "parse"
+  bm_size input.lines.size
 
   tiles, index = parse_tiles(input)
   #p tiles
@@ -71,7 +72,7 @@ def color_monsters(img)
   while row + 3 < dim
     col = 0
     while col + 19 < dim
-      if MONSTER.all? { |r,c| img[row + r][col + c] == "#" }
+      if MONSTER.all? { |r,c| bm_step; img[row + r][col + c] == "#" }
         found << [row, col]
       end
       col += 1
@@ -110,6 +111,7 @@ def fill(filled, dim:, tiles:, index:, row:, col:, used:)
       tile = tiles[id]
       if !used.key?(id)
         each_rotation(tile) do |rtile, rot|
+          bm_step
           if can_place?(grid: filled, tile: rtile, row: row, col: col)
             if res = fill(add_to_grid(filled, [id, rot, rtile], row: row, col: col), index: index, dim: dim, tiles: tiles, row: row, col: col + 1, used: used.merge(id => true))
               return res
