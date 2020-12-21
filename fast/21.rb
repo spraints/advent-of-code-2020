@@ -2,7 +2,7 @@ require_relative "./lib"
 require "set"
 
 def main(input)
-  bm "parse"
+  #bm "parse"
 
   bm "part 1"
 
@@ -38,10 +38,12 @@ def main(input)
     possible_allergens = np
   end
 
+  # in/21: 2659
   puts "part 1: #{(all_ingredients - bad.keys).size}"
 
   bm "part 2"
 
+  # in/21: rcqb,cltx,nrl,qjvvcvz,tsqpn,xhnk,tfqsb,zqzmzl
   puts "part 2: #{bad.sort_by(&:last).map(&:first).join(",")}"
 
 ensure
