@@ -3,7 +3,7 @@ require_relative "./lib"
 def main(input)
   bm "parse"
 
-  tiles = parse_tiles(input)
+  tiles, index = parse_tiles(input)
   #p tiles
 
   bm "part 1"
@@ -13,7 +13,7 @@ def main(input)
   }
 
   dim = Math.sqrt(tiles.size).to_i
-  filled = fill([], dim: dim, tiles: tiles, row: 0, col: 0, used: {})
+  filled = fill([], dim: dim, tiles: tiles, index: index, row: 0, col: 0, used: {})
   corners = [
     filled[0][0].first,
     filled[0][-1].first,
@@ -103,14 +103,15 @@ def trim_edges(raw_tile)
   raw_tile[1..-2].map { |line| line[1..-2] }
 end
 
-def fill(filled, dim:, tiles:, row:, col:, used:)
+def fill(filled, dim:, tiles:, index:, row:, col:, used:)
   return filled if row == dim
   if col < dim
-    tiles.each do |id, tile|
+    lookup_fits(filled, index: index, row: row, col: col).each do |id|
+      tile = tiles[id]
       if !used.key?(id)
         each_rotation(tile) do |rtile, rot|
           if can_place?(grid: filled, tile: rtile, row: row, col: col)
-            if res = fill(add_to_grid(filled, [id, rot, rtile], row: row, col: col), dim: dim, tiles: tiles, row: row, col: col + 1, used: used.merge(id => true))
+            if res = fill(add_to_grid(filled, [id, rot, rtile], row: row, col: col), index: index, dim: dim, tiles: tiles, row: row, col: col + 1, used: used.merge(id => true))
               return res
             end
           end
@@ -119,9 +120,26 @@ def fill(filled, dim:, tiles:, row:, col:, used:)
     end
     nil
   elsif row < dim
-    fill(filled, dim: dim, tiles: tiles, row: row + 1, col: 0, used: used)
+    fill(filled, dim: dim, tiles: tiles, index: index, row: row + 1, col: 0, used: used)
   else
     raise "unexpected"
+  end
+end
+
+def lookup_fits(filled, index:, row:, col:)
+  if row == 0
+    if col == 0
+      return index[0]
+    else
+      _, _, edges = filled[row][col - 1]
+      return index[edges[1]] || []
+    end
+  else
+    _, _, edges = filled[row - 1][col]
+    ids = index[edges[2]] || []
+    return ids if col == 0
+    _, _, edges = filled[row][col - 1]
+    return ids & (index[edges[1]] || [])
   end
 end
 
@@ -175,7 +193,8 @@ end
 
 def parse_tiles(input)
   lines = input.lines
-  res = {}
+  tiles = {}
+  index = Hash.new { |h,k| h[k] = [] }
   until lines.empty?
     lines.shift =~ /Tile (\d+)/ or raise "oops"
     tile_id = $1
@@ -185,9 +204,14 @@ def parse_tiles(input)
       break if line.empty?
       tile << line
     end
-    res[tile_id] = tile
+    tiles[tile_id] = tile
+    index[0] << tile_id
+    get_edges(tile).each do |edge|
+      index[edge] << tile_id
+      index[edge.reverse] << tile_id
+    end
   end
-  res
+  [tiles, index]
 end
 
 def get_edges(tile)
