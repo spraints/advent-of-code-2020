@@ -28,6 +28,23 @@ def sum3(arr, sum:)
   nil
 end
 
+SOLUTIONS = {}
+def p1done(solution)
+  if sol = SOLUTIONS[solution]
+    puts "part 1: #{solution} #{sol.inspect}"
+  else
+    puts "part 1: #{solution}"
+  end
+end
+
+def p2done(solution)
+  if sol = SOLUTIONS[solution]
+    puts "part 2: #{solution} #{sol.inspect}"
+  else
+    puts "part 2: #{solution}"
+  end
+end
+
 $bms = []
 $bm_size = 0
 $bm_step = "init"

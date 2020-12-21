@@ -1,6 +1,12 @@
 require_relative "./lib"
 require "set"
 
+SOLUTIONS.update \
+  2659 => [1, :input],
+  "rcqb,cltx,nrl,qjvvcvz,tsqpn,xhnk,tfqsb,zqzmzl" => [2, :input],
+  5 => [1, :sample],
+  "mxmxvkd,sqjhc,fvjkl" => [2, :sample]
+
 def main(input)
   #bm "parse"
   bm_size input.lines.size
@@ -42,12 +48,12 @@ def main(input)
   end
 
   # in/21: 2659
-  puts "part 1: #{(all_ingredients - bad.keys).size}"
+  p1done (all_ingredients - bad.keys).size
 
   bm "part 2"
 
   # in/21: rcqb,cltx,nrl,qjvvcvz,tsqpn,xhnk,tfqsb,zqzmzl
-  puts "part 2: #{bad.sort_by(&:last).map(&:first).join(",")}"
+  p2done bad.sort_by(&:last).map(&:first).join(",")
 
 ensure
   bm_done
