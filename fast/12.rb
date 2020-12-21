@@ -1,11 +1,7 @@
 require_relative "./lib"
 
 def main(input)
-  bm "parse"
-
   input = input.lines.map { |line| line =~ /(.)(\d+)/ && [$1, $2.to_i] }
-
-  bm "part 1"
 
   puts "part 1: #{move(input)} should be 319"
 

@@ -1,14 +1,11 @@
 require_relative "./lib"
 
 def main(input)
-  bm "parse"
-
   input = input.split.map(&:to_i)
 
   preamble = ARGV.first.to_i
   preamble = 25 if preamble < 1
 
-  bm "part 1"
   w1 = weakness1(input, preamble: preamble)
   puts "part 1: #{w1}"
 

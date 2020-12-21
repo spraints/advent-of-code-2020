@@ -1,8 +1,6 @@
 require_relative "./lib"
 
 def main(input)
-  bm "parse"
-
   input = input.lines
   rules = {}
   loop do
@@ -14,8 +12,6 @@ def main(input)
   messages = input
   #p rules
   #p messages
-
-  bm "part 1"
 
   puts "part 1: #{messages.count { |m| rules_match?(rules, m.strip.chars) }}"
 

@@ -1,11 +1,7 @@
 require_relative "./lib"
 
 def main(input)
-  bm "parse"
-
   input = input.lines
-
-  bm "part 1"
 
   mem = {}
   ormask = 0

@@ -1,11 +1,7 @@
 require_relative "./lib"
 
 def main(input)
-  bm "parse"
-
   input = input.lines.first.strip.split(",").map(&:to_i)
-
-  bm "part 1"
 
   init = input.dup
   last = nil

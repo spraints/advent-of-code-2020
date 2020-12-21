@@ -1,15 +1,11 @@
 require_relative "./lib"
 
 def main(input)
-  bm "parse"
-
   earliest_departure, bus_ids = input.lines
   earliest_departure = earliest_departure.to_i
   bus_ids = bus_ids.split(",")
 
   bm_size bus_ids.size
-
-  bm "part 1"
 
   bus_id, wait = bus_ids.reject { |id| bm_step; id == "x" }.map(&:to_i).map { |bus_id| bm_step; [bus_id, bus_id - earliest_departure % bus_id] }.sort_by { |_, x| x }.first
   puts "part 1: #{bus_id * wait}"

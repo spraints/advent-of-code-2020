@@ -1,12 +1,9 @@
 require_relative "./lib"
 
 def main(input)
-  bm "parse"
   bm_size input.lines.size
 
   input = input.lines.map(&:strip).map(&:chars)
-
-  bm "part 1"
 
   cur = input
   n = 0

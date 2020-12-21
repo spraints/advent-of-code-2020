@@ -1,14 +1,10 @@
 require_relative "./lib"
 
 def main(input)
-  bm "parse"
-
   rules, ticket, nearby = input.split("\n\n")
   rules = Rules.new(rules)
   ticket = ticket.lines[1]
   nearby = nearby.lines.drop(1)
-
-  bm "part 1"
 
   civ = []
   ok_tix = []

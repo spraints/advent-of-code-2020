@@ -1,11 +1,7 @@
 require_relative "./lib"
 
 def main(input)
-  bm "parse"
-
   parsed = input.lines.map { |line| parse_line(line) }
-
-  bm "part 1"
 
   sum = parsed.inject(0) { |sum, line| sum + eval_part1(line) }
 

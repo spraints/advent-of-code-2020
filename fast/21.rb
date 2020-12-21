@@ -8,10 +8,7 @@ SOLUTIONS.update \
   "mxmxvkd,sqjhc,fvjkl" => [2, :sample]
 
 def main(input)
-  #bm "parse"
   bm_size input.lines.size
-
-  bm "part 1"
 
   all_ingredients = []
   possible_allergens = {}
@@ -49,8 +46,6 @@ def main(input)
 
   # in/21: 2659
   p1done (all_ingredients - bad.keys).size
-
-  bm "part 2"
 
   # in/21: rcqb,cltx,nrl,qjvvcvz,tsqpn,xhnk,tfqsb,zqzmzl
   p2done bad.sort_by(&:last).map(&:first).join(",")

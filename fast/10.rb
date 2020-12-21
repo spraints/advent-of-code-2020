@@ -1,16 +1,12 @@
 require_relative "./lib"
 
 def main(input)
-  bm "parse"
-
   input = input.split.map(&:to_i)
   input << 0
   input << input.max + 3
 
   #preamble = ARGV.first.to_i
   #preamble = 25 if preamble < 1
-
-  bm "part 1"
 
   steps = Hash.new { |h,k| h[k] = 0 }
   input = input.sort

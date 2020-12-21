@@ -1,13 +1,11 @@
 require_relative "./lib"
 
 def main(input)
-  bm "parse"
   bm_size input.lines.size
 
   tiles, index = parse_tiles(input)
   #p tiles
 
-  bm "part 1"
   sols = {
     22878471088273 => "IN!",
     20899048083289 => "SAMPLE!",

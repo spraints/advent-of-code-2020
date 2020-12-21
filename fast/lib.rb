@@ -35,6 +35,7 @@ def p1done(solution)
   else
     puts "part 1: #{solution}"
   end
+  bm "part 2"
 end
 
 def p2done(solution)
@@ -47,13 +48,15 @@ end
 
 $bms = []
 $bm_size = 0
-$bm_step = "init"
+$bm_step = "part 1"
 $bm_steps = Hash.new { |h,k| h[k] = 0 }
 
 def bm(label)
   $bm_step = label
   $bms << [label, Process.clock_gettime(Process::CLOCK_MONOTONIC)]
 end
+
+bm "part 1"
 
 def bm_done
   $bms << [:done, Process.clock_gettime(Process::CLOCK_MONOTONIC)]
