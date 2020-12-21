@@ -30,7 +30,7 @@ def main(input)
   }
 
   image = filled.flat_map { |row| render(row, trim: true) }
-  each_rotation2(image) do |i|
+  each_rotation2(image) do |i, _|
     if res = color_monsters(i)
       _, found = res
       part2 = i.inject(-found.size * MONSTER.size) { |sum, row| sum + row.scan(/#/).size }
@@ -108,9 +108,9 @@ def fill(filled, dim:, tiles:, row:, col:, used:)
   if col < dim
     tiles.each do |id, tile|
       if !used.key?(id)
-        each_rotation(tile[:edges]) do |rtile, rot|
+        each_rotation(tile) do |rtile, rot|
           if can_place?(grid: filled, tile: rtile, row: row, col: col)
-            if res = fill(add_to_grid(filled, [id, tile.merge(rot), rtile], row: row, col: col), dim: dim, tiles: tiles, row: row, col: col + 1, used: used.merge(id => true))
+            if res = fill(add_to_grid(filled, [id, {raw: tile}.merge(rot), rtile], row: row, col: col), dim: dim, tiles: tiles, row: row, col: col + 1, used: used.merge(id => true))
               return res
             end
           end
@@ -126,31 +126,21 @@ def fill(filled, dim:, tiles:, row:, col:, used:)
 end
 
 def each_rotation(tile)
-  tile = tile.dup
-  4.times do |i|
-    # rot counter-clockwise
-    yield tile, {step: i, rev: false}
-    tile.push tile.shift
-  end
-  # flip top-right to bottom-left
-  tile = tile.map(&:reverse).reverse
-  4.times do |i|
-    # rot counter-clockwise
-    yield tile, {step: i, rev: true}
-    tile.push tile.shift
+  each_rotation2(tile) do |t, rot|
+    yield get_edges(t), rot
   end
 end
 
 def each_rotation2(raw)
   4.times do |i|
-    yield raw
+    yield raw, {step: i, rev: false}
     # rot counter-clockwise
     raw = raw.size.times.map { |i| raw.map { |row| row[i] }.join }.reverse
   end
   # flip top-right to bottom-left
   raw = raw.size.times.map { |i| raw.map { |row| row[i] }.join }
   4.times do |i|
-    yield raw
+    yield raw, {step: i, rev: true}
     # rot counter-clockwise
     raw = raw.size.times.map { |i| raw.map { |row| row[i] }.join }.reverse
   end
@@ -210,7 +200,7 @@ def parse_tiles(input)
       break if line.empty?
       tile << line
     end
-    res[tile_id] = {edges: get_edges(tile), raw: tile}
+    res[tile_id] = tile
   end
   res
 end
