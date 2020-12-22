@@ -14,26 +14,16 @@ def main(input)
   dupes = player1 & player2
   raise dupes.inspect unless dupes.empty?
 
-  until player1.empty? || player2.empty?
-    bm_step
-    #p player1
-    #p player2
-    p1 = player1.shift
-    p2 = player2.shift
-    if p1 > p2
-      player1 += [p1, p2]
-    else
-      player2 += [p2, p1]
-    end
-  end
+  _, winner = play(player1, player2)
 
-  p1done score(player1 + player2)
+  p1done score(winner)
 
   # ------
 
   player1, player2 = read_decks(input.lines)
 
-  _, winner = recplay(player1, player2)
+  _, winner = play(player1, player2, rec: true)
+  #printf "\n"
   p2done score(winner)
 
 ensure
@@ -44,10 +34,15 @@ def score(winner)
   winner.reverse.zip((1..winner.size).to_a).map { |a, b| a * b }.sum
 end
 
-def recplay(player1, player2, level = 0)
+$x = 0
+def play(player1, player2, level: 0, rec: false)
   seen = Set.new
   until player1.empty? || player2.empty?
     bm_step
+    #$x += 1
+    #if $x % 10_000 == 0
+    #  print "."
+    #end
     #p level: level, one: player1, two: player2
 
     key = player1.join(",") + "|" + player2.join(",")
@@ -60,8 +55,8 @@ def recplay(player1, player2, level = 0)
     p1 = player1.shift
     p2 = player2.shift
     winner = 
-      if p1 <= player1.size && p2 <= player2.size
-        recplay(player1.take(p1), player2.take(p2), level + 1).first
+      if rec && p1 <= player1.size && p2 <= player2.size
+        play(player1.take(p1), player2.take(p2), level: level + 1, rec: true).first
       else
         p1 > p2 ? :p1 : :p2
       end
