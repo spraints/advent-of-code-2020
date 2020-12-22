@@ -15,7 +15,6 @@ def main(input)
   raise dupes.inspect unless dupes.empty?
 
   _, winner = play(player1, player2)
-
   p1done score(winner)
 
   # ------
@@ -23,7 +22,6 @@ def main(input)
   player1, player2 = read_decks(input.lines)
 
   _, winner = play(player1, player2, rec: true)
-  #printf "\n"
   p2done score(winner)
 
 ensure
@@ -34,20 +32,14 @@ def score(winner)
   winner.reverse.zip((1..winner.size).to_a).map { |a, b| a * b }.sum
 end
 
-$x = 0
+#$memo = {}
 def play(player1, player2, level: 0, rec: false)
   seen = Set.new
   until player1.empty? || player2.empty?
     bm_step
-    #$x += 1
-    #if $x % 10_000 == 0
-    #  print "."
-    #end
-    #p level: level, one: player1, two: player2
 
-    key = player1.join(",") + "|" + player2.join(",")
+    key = Marshal.dump([player1, player2])
     if seen.include?(key)
-      #p abort: :p1
       return [:p1, player1]
     end
     seen.add(key)

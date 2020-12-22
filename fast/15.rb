@@ -37,7 +37,7 @@ def main(input)
     said[last] = turn - 1 if last
     last = n
   end
-  puts "part 1: #{last}"
+  puts "part 2: #{last}"
 
 ensure
   bm_done
