@@ -32,7 +32,6 @@ def score(winner)
   winner.reverse.zip((1..winner.size).to_a).map { |a, b| a * b }.sum
 end
 
-#$memo = {}
 def play(player1, player2, level: 0, rec: false)
   seen = Set.new
   until player1.empty? || player2.empty?
