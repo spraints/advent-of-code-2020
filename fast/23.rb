@@ -22,10 +22,16 @@ def main(input)
   # ------
 
   cups = Cups.new(input.split(//).map(&:to_i) + (10..1_000_000).to_a)
-  #n = 0
+  t = Time.now.to_f
+  n = 0
   10_000_000.times do |i|
-    #n += 1
-    #print "." if n % 100_000 == 0
+    n += 1
+    if n % 100_000 == 0
+      t2 = Time.now.to_f
+      m = (1000.0*(t2 - t)).to_i
+      print ".#{m}"
+      t = t2
+    end
     cups.play
   end
 
