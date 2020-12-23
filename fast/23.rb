@@ -45,10 +45,18 @@ end
 class Cups
   def initialize(cups)
     @max = cups.max
-    @nodes = Hash.new { |h,k| h[k] = Node.new(k) }
-    cups.each_cons(2) { |a,b| @nodes[a].nxt = @nodes[b] }
+    @nodes = []
+    cups.each_cons(2) { |a,b| init_node(a).nxt = init_node(b) }
     @nodes[cups.last].nxt = @nodes[cups.first]
     @current = @nodes[cups.first]
+  end
+
+  def init_node(val)
+    @nodes[val] ||= Node.new(val)
+  end
+
+  def node(val)
+    @nodes[val]
   end
 
   def play
