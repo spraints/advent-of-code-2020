@@ -26,7 +26,7 @@ def main(input)
   n = 0
   10_000_000.times do |i|
     n += 1
-    if n % 100_000 == 0
+    if n % 500_000 == 0
       t2 = Time.now.to_f
       m = (1000.0*(t2 - t)).to_i
       print ".#{m}"
@@ -45,37 +45,37 @@ end
 class Cups
   def initialize(cups)
     @max = cups.max
-    @nodes = Hash.new { |h,k| h[k] = {val: k} }
-    cups.each_cons(2) { |a,b| @nodes[a][:next] = @nodes[b] }
-    @nodes[cups.last][:next] = @nodes[cups.first]
+    @nodes = Hash.new { |h,k| h[k] = Node.new(k) }
+    cups.each_cons(2) { |a,b| @nodes[a].nxt = @nodes[b] }
+    @nodes[cups.last].nxt = @nodes[cups.first]
     @current = @nodes[cups.first]
   end
 
   def play
-    pick = @current[:next]
-    pick2 = pick[:next]
-    pick3 = pick2[:next]
+    pick = @current.nxt
+    pick2 = pick.nxt
+    pick3 = pick2.nxt
     #p picked: [pick[:val], pick2[:val], pick3[:val]]
-    rest = pick3[:next]
+    rest = pick3.nxt
 
-    dest = @current[:val] - 1
+    dest = @current.val - 1
     dest = @max if dest == 0
-    while pick[:val] == dest || pick2[:val] == dest || pick3[:val] == dest
+    while pick.val == dest || pick2.val == dest || pick3.val == dest
       dest = dest == 1 ? @max : dest - 1
     end
     #p dest: dest
 
-    @current[:next] = rest
+    @current.nxt = rest
     #p n: {val: @nodes[dest][:val], nxt: @nodes[dest][:next][:val]}
-    pick3[:next] = @nodes[dest][:next]
-    @nodes[dest][:next] = pick
+    pick3.nxt = @nodes[dest].nxt
+    @nodes[dest].nxt = pick
 
     @current = rest
   end
 
   def stars
-    a = @nodes[1][:next][:val]
-    b = @nodes[1][:next][:next][:val]
+    a = @nodes[1].nxt.val
+    b = @nodes[1].nxt.nxt.val
     [a, b]
   end
 
@@ -83,12 +83,21 @@ class Cups
     res = []
     cur = @current
     loop do
-      res << cur[:val]
-      cur = cur[:next]
+      res << cur.val
+      cur = cur.nxt
       break if cur == @current
     end
     res
   end
+end
+
+class Node
+  def initialize(val)
+    @val = val
+  end
+
+  attr_reader :val
+  attr_accessor :nxt
 end
 
 #main("389125467")
