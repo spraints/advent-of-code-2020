@@ -2,14 +2,18 @@ require_relative "./lib"
 require "set"
 
 SOLUTIONS.update \
-  "32658947" => [1, :in]
+  "32658947" => [1, :in],
+  "67384529" => [1, :sample],
+  149245887792 => [2, :sample],
+  683486010900 => [2, :in]
 
 def main(input)
-  cups = input.split(//).map(&:to_i)
+  cups = Cups.new(input.split(//).map(&:to_i))
   100.times do |i|
-    p cups if i < 10
-    play(cups, i%9, 9)
+    #p cups.to_a
+    cups.play
   end
+  cups = cups.to_a
   until (c = cups.shift) == 1
     cups.push c
   end
@@ -17,54 +21,69 @@ def main(input)
 
   # ------
 
-  return
-  cups = input.split(//).map(&:to_i)
-  cups += (10..1_000_000).to_a
-  n = 0
+  cups = Cups.new(input.split(//).map(&:to_i) + (10..1_000_000).to_a)
+  #n = 0
   10_000_000.times do |i|
-    n += 1
-    print "." if n % 10 == 0
-    cups = play(cups, i%1_000_000, 1_000_000)
+    #n += 1
+    #print "." if n % 100_000 == 0
+    cups.play
   end
-  p cups.first
 
-  #p2done score(winner)
+  a, b = cups.stars
+  p2done a*b
 
 ensure
   bm_done
 end
 
-def play(cups, i, max)
-  current = cups[i]
-  pickedup_i = (1..3).map { |d| (i+d)%max }
-  pickedup = pickedup_i.map { |j| cups[j] }
-  destn = current - 1
-  destn = max if destn == 0
-  while pickedup.include?(destn)
-    destn -= 1
-    destn = max if destn == 0
+class Cups
+  def initialize(cups)
+    @max = cups.max
+    @nodes = Hash.new { |h,k| h[k] = {val: k} }
+    cups.each_cons(2) { |a,b| @nodes[a][:next] = @nodes[b] }
+    @nodes[cups.last][:next] = @nodes[cups.first]
+    @current = @nodes[cups.first]
   end
-  j = cups.index(destn) or raise "boom"
-  p cur: current, pup: pickedup, dest: destn, j: j
-  if j > i
-    moving = cups[(i+4)..j]
-    p moving: moving
-    cups[(i+1)..(j-3)] = cups[(i+4)..j]
-    p insert1: cups, nxt: (j-2)..j
-    cups[(j-2)..j] = pickedup
-    p insert2: cups
-  else
-    cups[(i+1)..(max-3)] = cups[(i+4)..max]
-    p insert1: cups
-    cups[(max-3)..(max-j)] = cups[
-    raise "boom"
+
+  def play
+    pick = @current[:next]
+    pick2 = pick[:next]
+    pick3 = pick2[:next]
+    #p picked: [pick[:val], pick2[:val], pick3[:val]]
+    rest = pick3[:next]
+
+    dest = @current[:val] - 1
+    dest = @max if dest == 0
+    while pick[:val] == dest || pick2[:val] == dest || pick3[:val] == dest
+      dest = dest == 1 ? @max : dest - 1
+    end
+    #p dest: dest
+
+    @current[:next] = rest
+    #p n: {val: @nodes[dest][:val], nxt: @nodes[dest][:next][:val]}
+    pick3[:next] = @nodes[dest][:next]
+    @nodes[dest][:next] = pick
+
+    @current = rest
   end
-  #cups
-  #raise "cur=[#{i}]#{current} dest=[#{j}]#{destn} [#{(i+1)..(j-1)}]"
-  #rest.insert(i + 1, *pickedup)
-  #rest << current
-  #rest
+
+  def stars
+    a = @nodes[1][:next][:val]
+    b = @nodes[1][:next][:next][:val]
+    [a, b]
+  end
+
+  def to_a
+    res = []
+    cur = @current
+    loop do
+      res << cur[:val]
+      cur = cur[:next]
+      break if cur == @current
+    end
+    res
+  end
 end
 
-main("389125467")
-#main("598162734")
+#main("389125467")
+main("598162734")
