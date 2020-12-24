@@ -3,10 +3,9 @@ require "set"
 
 SOLUTIONS.update \
   10 => [1, :sample],
-  300 => [1, :in]
-#  "32658947" => [1, :in],
-#  149245887792 => [2, :sample],
-#  683486010900 => [2, :in]
+  300 => [1, :in],
+  2208 => [2, :sample],
+  3466 => [2, :in]
 
 def main(input)
 
@@ -25,14 +24,51 @@ def main(input)
 
   p1done tiles.values.select { |x| x }.size
 
-  #p1done cups.join
-
   # ---------------------------------
 
-  #p2done a*b
+  100.times do
+    tiles = gol(tiles)
+  end
+
+  p2done tiles.values.select { |x| x }.size
 
 ensure
   bm_done
+end
+
+def gol(tiles)
+  # Any black tile with zero or more than 2 black tiles immediately adjacent to it is flipped to white.
+  # Any white tile with exactly 2 black tiles immediately adjacent to it is flipped to black.
+  new_tiles = {}
+  black_tiles = tiles.select { |_, v| v }.map(&:first)
+  white_neighbors = []
+  black_tiles.each do |pos|
+    n = neighbors(pos)
+    bn, wn = n.partition { |npos| tiles[npos] }
+    if bn.size == 1 || bn.size == 2
+      new_tiles[pos] = true
+    end
+    white_neighbors += wn
+  end
+  white_neighbors.each do |pos|
+    n = neighbors(pos)
+    bn, _ = n.partition { |npos| tiles[npos] }
+    if bn.size == 2
+      new_tiles[pos] = true
+    end
+  end
+  new_tiles
+end
+
+def neighbors(pos)
+  x, y = pos
+  dxs =
+    if y % 2 == 0
+      [-1, 0]
+    else
+      [0, 1]
+    end
+  dxs.inject([ [x-1,y], [x+1,y] ]) { |res, dx| res += [ [x+dx,y+1], [x+dx,y-1] ] }
 end
 
 class Directions
