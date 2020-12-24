@@ -9,17 +9,17 @@ SOLUTIONS.update \
 
 def main(input)
 
-  tiles = {}
+  tiles = Set.new
   input.lines.each do |line|
     dir = Directions.new(line)
     pos = ORIGIN
     until dir.empty?
       pos = dir.step(pos)
     end
-    if tiles[pos]
+    if tiles.include?(pos)
       tiles.delete(pos)
     else
-      tiles[pos] = true
+      tiles.add(pos)
     end
   end
 
@@ -60,14 +60,14 @@ DIRS = [E, W, NE, NW, SE, SW].freeze
 def gol(tiles)
   # Any black tile with zero or more than 2 black tiles immediately adjacent to it is flipped to white.
   # Any white tile with exactly 2 black tiles immediately adjacent to it is flipped to black.
-  new_tiles = {}
+  new_tiles = Set.new
   white_neighbors = Hash.new(0)
-  tiles.keys.each do |pos|
+  tiles.each do |pos|
     bm_step
     n = neighbors(pos)
-    bn, wn = n.partition { |npos| tiles[npos] }
+    bn, wn = n.partition { |npos| tiles.include?(npos) }
     if bn.size == 1 || bn.size == 2
-      new_tiles[pos] = true
+      new_tiles.add(pos)
     end
     wn.each do |npos|
       bm_step
@@ -77,7 +77,7 @@ def gol(tiles)
   white_neighbors.each do |pos, count|
     bm_step
     if count == 2
-      new_tiles[pos] = true
+      new_tiles.add(pos)
     end
   end
   new_tiles
