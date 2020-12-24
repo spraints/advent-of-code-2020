@@ -12,7 +12,7 @@ def main(input)
   tiles = {}
   input.lines.each do |line|
     dir = Directions.new(line)
-    pos = [0,0,0]
+    pos = ORIGIN
     until dir.empty?
       pos = dir.step(pos)
     end
@@ -32,6 +32,15 @@ def main(input)
 ensure
   bm_done
 end
+
+ORIGIN = [0, 0, 0].freeze
+E = [1, -1, 0].freeze
+W = [-1, 1, 0].freeze
+NE = [1, 0, -1].freeze
+NW = [0, 1, -1].freeze
+SE = [0, -1, 1].freeze
+SW = [-1, 0, 1].freeze
+DIRS = [E, W, NE, NW, SE, SW].freeze
 
 def gol(tiles)
   # Any black tile with zero or more than 2 black tiles immediately adjacent to it is flipped to white.
@@ -60,17 +69,7 @@ def gol(tiles)
 end
 
 def neighbors(pos)
-  x, y, z = pos
-  [
-    [1, -1, 0],
-    [-1, 1, 0],
-    [1, 0, -1],
-    [-1, 0, 1],
-    [0, 1, -1],
-    [0, -1, 1],
-  ].map { |dx, dy, dz|
-    [x+dx, y+dy, z+dz]
-  }
+  DIRS.map { |dir| add(pos, dir) }
 end
 
 class Directions
@@ -84,36 +83,39 @@ class Directions
 
   def step(pos)
     bm_step
-    x, y, z = pos
-    dx, dy, dz =
+    dir =
       case a = @chars.shift
       when "e"
-        [1, -1, 0]
+        E
       when "w"
-        [-1, 1, 0]
+        W
       when "n"
         case b = @chars.shift
         when "e"
-          [1, 0, -1]
+          NE
         when "w"
-          [0, 1, -1]
+          NW
         else
           raise "unexpected #{b.inspect}"
         end
       when "s"
         case b = @chars.shift
         when "e"
-          [0, -1, 1]
+          SE
         when "w"
-          [-1, 0, 1]
+          SW
         else
           raise "unexpected #{b.inspect}"
         end
       else
         raise "unexpected #{a.inspect}"
       end
-    [x+dx, y+dy, z+dz]
+    add(pos, dir)
   end
+end
+
+def add(pos, dir)
+  pos.zip(dir).map { |a, b| a + b }
 end
 
 main($stdin.read)
