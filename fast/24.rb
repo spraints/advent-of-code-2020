@@ -33,13 +33,13 @@ ensure
   bm_done
 end
 
-ORIGIN = [0, 0, 0].freeze
-E = [1, -1, 0].freeze
-W = [-1, 1, 0].freeze
-NE = [1, 0, -1].freeze
-NW = [0, 1, -1].freeze
-SE = [0, -1, 1].freeze
-SW = [-1, 0, 1].freeze
+ORIGIN = [0, 0].freeze # [q, r]
+E = [1, 0].freeze
+W = [-1, 0].freeze
+NE = [1, -1].freeze
+NW = [0, -1].freeze
+SE = [0, 1].freeze
+SW = [-1, 1].freeze
 DIRS = [E, W, NE, NW, SE, SW].freeze
 
 def gol(tiles)
