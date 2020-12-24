@@ -33,13 +33,23 @@ ensure
   bm_done
 end
 
-ORIGIN = [0, 0].freeze # [q, r]
-E = [1, 0].freeze
-W = [-1, 0].freeze
-NE = [1, -1].freeze
-NW = [0, -1].freeze
-SE = [0, 1].freeze
-SW = [-1, 1].freeze
+if ENV["CUBE"]
+  ORIGIN = [0, 0, 0].freeze # [x, y, z]
+  E = [1, -1, 0].freeze
+  W = [-1, 1, 0].freeze
+  NE = [1, 0, -1].freeze
+  NW = [0, 1, -1].freeze
+  SE = [0, -1, 1].freeze
+  SW = [-1, 0, 1].freeze
+else
+  ORIGIN = [0, 0].freeze # [q, r]
+  E = [1, 0].freeze
+  W = [-1, 0].freeze
+  NE = [1, -1].freeze
+  NW = [0, -1].freeze
+  SE = [0, 1].freeze
+  SW = [-1, 1].freeze
+end
 DIRS = [E, W, NE, NW, SE, SW].freeze
 
 def gol(tiles)
