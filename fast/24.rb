@@ -11,14 +11,11 @@ def main(input)
 
   tiles = {}
   input.lines.each do |line|
-    #puts "==="
     dir = Directions.new(line)
-    pos = [0,0]
+    pos = [0,0,0]
     until dir.empty?
       pos = dir.step(pos)
-      #p pos
     end
-    pos = pos.take(2)
     tiles[pos] = !tiles[pos]
   end
 
@@ -43,6 +40,7 @@ def gol(tiles)
   black_tiles = tiles.select { |_, v| v }.map(&:first)
   white_neighbors = []
   black_tiles.each do |pos|
+    bm_step
     n = neighbors(pos)
     bn, wn = n.partition { |npos| tiles[npos] }
     if bn.size == 1 || bn.size == 2
@@ -51,6 +49,7 @@ def gol(tiles)
     white_neighbors += wn
   end
   white_neighbors.each do |pos|
+    bm_step
     n = neighbors(pos)
     bn, _ = n.partition { |npos| tiles[npos] }
     if bn.size == 2
@@ -61,14 +60,17 @@ def gol(tiles)
 end
 
 def neighbors(pos)
-  x, y = pos
-  dxs =
-    if y % 2 == 0
-      [-1, 0]
-    else
-      [0, 1]
-    end
-  dxs.inject([ [x-1,y], [x+1,y] ]) { |res, dx| res += [ [x+dx,y+1], [x+dx,y-1] ] }
+  x, y, z = pos
+  [
+    [1, -1, 0],
+    [-1, 1, 0],
+    [1, 0, -1],
+    [-1, 0, 1],
+    [0, 1, -1],
+    [0, -1, 1],
+  ].map { |dx, dy, dz|
+    [x+dx, y+dy, z+dz]
+  }
 end
 
 class Directions
@@ -81,49 +83,36 @@ class Directions
   end
 
   def step(pos)
-    x, y, = pos
-    case a = @chars.shift
-    when "e"
-      [x + 1, y, :east]
-    when "w"
-      [x - 1, y, :west]
-    when "n"
-      case b = @chars.shift
+    bm_step
+    x, y, z = pos
+    dx, dy, dz =
+      case a = @chars.shift
       when "e"
-        if y % 2 == 0
-          [x, y + 1, :ne]
-        else
-          [x + 1, y + 1, :ne]
-        end
+        [1, -1, 0]
       when "w"
-        if y % 2 == 1
-          [x, y + 1, :nw]
+        [-1, 1, 0]
+      when "n"
+        case b = @chars.shift
+        when "e"
+          [1, 0, -1]
+        when "w"
+          [0, 1, -1]
         else
-          [x - 1, y + 1, :nw]
+          raise "unexpected #{b.inspect}"
+        end
+      when "s"
+        case b = @chars.shift
+        when "e"
+          [0, -1, 1]
+        when "w"
+          [-1, 0, 1]
+        else
+          raise "unexpected #{b.inspect}"
         end
       else
-        raise "unexpected #{b.inspect}"
+        raise "unexpected #{a.inspect}"
       end
-    when "s"
-      case b = @chars.shift
-      when "e"
-        if y % 2 == 0
-          [x, y - 1, :se]
-        else
-          [x + 1, y - 1, :se]
-        end
-      when "w"
-        if y % 2 == 1
-          [x, y - 1, :sw]
-        else
-          [x - 1, y - 1, :sw]
-        end
-      else
-        raise "unexpected #{b.inspect}"
-      end
-    else
-      raise "unexpected #{a.inspect}"
-    end
+    [x+dx, y+dy, z+dz]
   end
 end
 
