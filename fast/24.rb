@@ -16,18 +16,23 @@ def main(input)
     until dir.empty?
       pos = dir.step(pos)
     end
-    tiles[pos] = !tiles[pos]
+    if tiles[pos]
+      tiles.delete(pos)
+    else
+      tiles[pos] = true
+    end
   end
 
-  p1done tiles.values.select { |x| x }.size
+  p1done tiles.size
 
   # ---------------------------------
 
-  100.times do
+  100.times do |i|
+    #bm "p2i#{i} #{tiles.size}"
     tiles = gol(tiles)
   end
 
-  p2done tiles.values.select { |x| x }.size
+  p2done tiles.size
 
 ensure
   bm_done
@@ -56,9 +61,8 @@ def gol(tiles)
   # Any black tile with zero or more than 2 black tiles immediately adjacent to it is flipped to white.
   # Any white tile with exactly 2 black tiles immediately adjacent to it is flipped to black.
   new_tiles = {}
-  black_tiles = tiles.select { |_, v| v }.map(&:first)
   white_neighbors = Hash.new(0)
-  black_tiles.each do |pos|
+  tiles.keys.each do |pos|
     bm_step
     n = neighbors(pos)
     bn, wn = n.partition { |npos| tiles[npos] }
