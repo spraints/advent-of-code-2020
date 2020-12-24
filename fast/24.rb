@@ -57,7 +57,7 @@ def gol(tiles)
   # Any white tile with exactly 2 black tiles immediately adjacent to it is flipped to black.
   new_tiles = {}
   black_tiles = tiles.select { |_, v| v }.map(&:first)
-  white_neighbors = []
+  white_neighbors = Hash.new(0)
   black_tiles.each do |pos|
     bm_step
     n = neighbors(pos)
@@ -65,13 +65,14 @@ def gol(tiles)
     if bn.size == 1 || bn.size == 2
       new_tiles[pos] = true
     end
-    white_neighbors += wn
+    wn.each do |npos|
+      bm_step
+      white_neighbors[npos] += 1
+    end
   end
-  white_neighbors.each do |pos|
+  white_neighbors.each do |pos, count|
     bm_step
-    n = neighbors(pos)
-    bn, _ = n.partition { |npos| tiles[npos] }
-    if bn.size == 2
+    if count == 2
       new_tiles[pos] = true
     end
   end
@@ -79,7 +80,7 @@ def gol(tiles)
 end
 
 def neighbors(pos)
-  DIRS.map { |dir| add(pos, dir) }
+  DIRS.map { |dir| bm_step; add(pos, dir) }
 end
 
 class Directions
