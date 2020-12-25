@@ -89,41 +89,37 @@ end
 
 class Directions
   def initialize(line)
-    @chars = line.strip.chars
+    @line = line.strip
   end
 
   def empty?
-    @chars.empty?
+    @line.empty?
   end
 
   def step(pos)
     bm_step
     dir =
-      case a = @chars.shift
-      when "e"
+      case @line
+      when /^se/
+        @line = @line[2..-1]
+        SE
+      when /^sw/
+        @line = @line[2..-1]
+        SW
+      when /^ne/
+        @line = @line[2..-1]
+        NE
+      when /^nw/
+        @line = @line[2..-1]
+        NW
+      when /^e/
+        @line = @line[1..-1]
         E
-      when "w"
+      when /^w/
+        @line = @line[1..-1]
         W
-      when "n"
-        case b = @chars.shift
-        when "e"
-          NE
-        when "w"
-          NW
-        else
-          raise "unexpected #{b.inspect}"
-        end
-      when "s"
-        case b = @chars.shift
-        when "e"
-          SE
-        when "w"
-          SW
-        else
-          raise "unexpected #{b.inspect}"
-        end
       else
-        raise "unexpected #{a.inspect}"
+        raise "invalid #{@line.inspect}"
       end
     add(pos, dir)
   end
