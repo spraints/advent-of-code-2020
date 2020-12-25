@@ -56,12 +56,7 @@ def bfpk(pk)
 end
 
 def transform(subject:, ls:)
-  val = 1
-  ls.times do
-    val = val * subject
-    val = val % 20201227
-  end
-  val
+  subject.pow(ls, 20201227)
 end
 
 main($stdin.read)
