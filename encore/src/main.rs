@@ -5,6 +5,7 @@ mod common;
 
 mod day1;
 mod day2;
+mod day3;
 
 fn main() {
     let mut args = env::args();
@@ -14,6 +15,7 @@ fn main() {
         Some(arg) => match arg.as_str() {
             "day1" => day1::run(stdin()),
             "day2" => day2::run(stdin()),
+            "day3" => day3::run(stdin()),
             _ => println!("'{}' is not implemented.", arg),
         },
     };
