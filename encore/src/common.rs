@@ -2,6 +2,12 @@ use std::fmt::Debug;
 use std::io::{BufRead, BufReader, Read};
 use std::str::FromStr;
 
+mod parser;
+
+pub fn make_parser(s: &str) -> parser::Parser {
+    parser::Parser::new(s)
+}
+
 pub fn parse_lines<T, R>(r: R) -> Vec<T>
 where
     T: FromStr,
