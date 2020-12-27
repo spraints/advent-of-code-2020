@@ -1,4 +1,5 @@
 use std::env;
+use std::io::stdin;
 
 mod common;
 
@@ -10,7 +11,7 @@ fn main() {
     match args.next() {
         None => println!("Usage: cargo run dayN"),
         Some(arg) => match arg.as_str() {
-            "day1" => day1::run(),
+            "day1" => day1::run(stdin()),
             _ => println!("'{}' is not implemented.", arg),
         },
     };

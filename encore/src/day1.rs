@@ -1,11 +1,11 @@
 use super::common;
 
-pub fn run() {
-    let mut numbers = common::parse_lines();
+pub fn run<T: std::io::Read>(input: T) {
+    let mut numbers = common::parse_lines(input);
     numbers.sort();
-    let (a,b) = twosum(&numbers, 2020).unwrap();
+    let (a, b) = twosum(&numbers, 2020).unwrap();
     println!("part 1: {}", numbers[a] * numbers[b]);
-    let (a,b,c) = threesum(&numbers, 2020).unwrap();
+    let (a, b, c) = threesum(&numbers, 2020).unwrap();
     println!("part 2: {}", numbers[a] * numbers[b] * numbers[c]);
 }
 
@@ -13,9 +13,9 @@ fn threesum(numbers: &[i64], goal: i64) -> Option<(usize, usize, usize)> {
     let mut a = numbers.len();
     while a > 0 {
         a -= 1;
-        match twosum(&numbers[..a], goal-numbers[a]) {
+        match twosum(&numbers[..a], goal - numbers[a]) {
             None => (),
-            Some((b, c)) => return Some((a,b,c)),
+            Some((b, c)) => return Some((a, b, c)),
         };
     }
     None

@@ -1,21 +1,29 @@
-use std::str::FromStr;
 use std::fmt::Debug;
+use std::io::{BufRead, BufReader, Read};
+use std::str::FromStr;
 
-pub fn parse_lines<T>() -> Vec<T> where T: FromStr, <T as FromStr>::Err: Debug {
-    read_lines().map(|line| line.parse().unwrap()).collect()
+pub fn parse_lines<T, R>(r: R) -> Vec<T>
+where
+    T: FromStr,
+    <T as FromStr>::Err: Debug,
+    R: Read,
+{
+    read_lines(r).map(|line| line.parse().unwrap()).collect()
 }
 
-pub fn read_lines() -> ReadLines {
-    let stdin = std::io::stdin();
-    ReadLines{stdin, done: false}
+pub fn read_lines<R: Read>(r: R) -> ReadLines<BufReader<R>> {
+    ReadLines {
+        reader: BufReader::new(r),
+        done: false,
+    }
 }
 
-pub struct ReadLines {
-    stdin: std::io::Stdin,
+pub struct ReadLines<R> {
+    reader: R,
     done: bool,
 }
 
-impl Iterator for ReadLines {
+impl<R: BufRead> Iterator for ReadLines<R> {
     type Item = String;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -23,9 +31,12 @@ impl Iterator for ReadLines {
             None
         } else {
             let mut line = String::new();
-            match self.stdin.read_line(&mut line).unwrap() {
-                0 => {self.done = true; None},
-                _ => Some(line.trim().to_string())
+            match self.reader.read_line(&mut line).unwrap() {
+                0 => {
+                    self.done = true;
+                    None
+                }
+                _ => Some(line.trim().to_string()),
             }
         }
     }
