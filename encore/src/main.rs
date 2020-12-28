@@ -32,7 +32,7 @@ fn main() {
             "day7" => day7::run(stdin()),
             "day8" => day8::run(stdin()),
             "day9" => day9::run(stdin()),
-            _ => println!("'{}' is not implemented.", arg),
+            _ => panic!("'{}' is not implemented.", arg),
         },
     };
     if let Ok(_) = std::env::var("TIMER") {
