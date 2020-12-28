@@ -35,7 +35,7 @@ fn from_beginning(graph: &[(usize, usize)]) -> HashSet<usize> {
 
 fn from_end(graph: &[(usize, usize)]) -> HashSet<usize> {
     let mut reversed = Vec::new();
-    reversed.resize_with(graph.len() + 1, || Vec::new());
+    reversed.resize_with(graph.len() + 1, Vec::new);
     for (i, (nxt, _)) in graph.iter().enumerate() {
         if let Some(r) = reversed.get_mut(*nxt) {
             r.push(i);

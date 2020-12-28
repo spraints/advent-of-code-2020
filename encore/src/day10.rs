@@ -1,16 +1,16 @@
 use super::common;
-use std::io::Read;
 use std::collections::HashMap;
+use std::io::Read;
 
 pub fn run<R: Read>(r: R) {
     let mut joltages = common::parse_lines(r);
     joltages.sort_unstable();
-    joltages.push(joltages[joltages.len()-1] + 3);
+    joltages.push(joltages[joltages.len() - 1] + 3);
     println!("part 1: {}", solve(&joltages));
     println!("part 2: {}", solve2(&joltages));
 }
 
-fn solve2(joltages: &Vec<u16>) -> usize {
+fn solve2(joltages: &[u16]) -> usize {
     let mut memo = HashMap::new();
     paths(0, &joltages, &mut memo)
 }
@@ -27,22 +27,19 @@ fn paths(j: u16, joltages: &[u16], memo: &mut HashMap<u16, usize>) -> usize {
     for i in 0..joltages.len() {
         let nxt = joltages[i];
         if nxt > max {
-            //println!("{} -> {} is too much!", j, nxt);
             break;
         }
-        res += paths(nxt, &joltages[i+1..], memo);
+        res += paths(nxt, &joltages[i + 1..], memo);
     }
-    //println!("{}->end: {} ({:?})", j, res, joltages);
     memo.insert(j, res);
     res
 }
 
-fn solve(joltages: &Vec<u16>) -> usize {
+fn solve(joltages: &[u16]) -> usize {
     let mut s1 = 0;
     let mut s3 = 0;
     let mut j1 = &0;
-    for (i, j2) in joltages.iter().enumerate() {
-        //println!("[{}, {}] => {}", j1, j2, j2 - j1);
+    for j2 in joltages.iter() {
         match j2 - j1 {
             0 => panic!("did not expect a duplicate! {}", j1),
             1 => s1 += 1,
@@ -51,6 +48,5 @@ fn solve(joltages: &Vec<u16>) -> usize {
         };
         j1 = j2;
     }
-    //println!("{}, {}", s1, s3);
-    s1*s3
+    s1 * s3
 }
