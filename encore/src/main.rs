@@ -14,6 +14,7 @@ mod day5;
 mod day6;
 mod day7;
 mod day8;
+mod day9;
 
 fn main() {
     let start = Instant::now();
@@ -30,6 +31,7 @@ fn main() {
             "day6" => day6::run(stdin()),
             "day7" => day7::run(stdin()),
             "day8" => day8::run(stdin()),
+            "day9" => day9::run(stdin()),
             _ => println!("'{}' is not implemented.", arg),
         },
     };
