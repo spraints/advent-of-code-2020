@@ -12,7 +12,7 @@ pub fn run<R: Read>(r: R) {
 
 fn solve2(joltages: &Vec<u16>) -> usize {
     let mut memo = HashMap::new();
-    2 * paths(0, &joltages, &mut memo)
+    paths(0, &joltages, &mut memo)
 }
 
 fn paths(j: u16, joltages: &[u16], memo: &mut HashMap<u16, usize>) -> usize {
@@ -24,13 +24,15 @@ fn paths(j: u16, joltages: &[u16], memo: &mut HashMap<u16, usize>) -> usize {
     }
     let max = j + 3;
     let mut res = 0;
-    for i in 1..joltages.len() {
+    for i in 0..joltages.len() {
         let nxt = joltages[i];
         if nxt > max {
+            //println!("{} -> {} is too much!", j, nxt);
             break;
         }
-        res += paths(nxt, &joltages[i..], memo);
+        res += paths(nxt, &joltages[i+1..], memo);
     }
+    //println!("{}->end: {} ({:?})", j, res, joltages);
     memo.insert(j, res);
     res
 }
