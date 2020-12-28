@@ -23,5 +23,6 @@ NL=$'\n'
 sed -E -i "" \
   -e "/day${daynum}/d" \
   -e "s/mod day${prev};/mod day${prev};\\${NL}mod day${daynum};/" \
-  -e "s/(day${prev}::run.*)/\\1\\${NL}            \"day${daynum}\" => day${daynum}::run(stdin()),/" \
+  -e "s/( day${prev}::run.*)/\\1\\${NL}            \"day${daynum}\" => day${daynum}::run(stdin()),/" \
+  -e "s/(day${prev}::run,.*)/\\1\\${NL}    time(day${daynum}::run, \"..\\/fast\\/in\\/${daynum}\");/" \
   src/main.rs
