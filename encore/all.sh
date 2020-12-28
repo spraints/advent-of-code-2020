@@ -1,5 +1,5 @@
 #!/bin/bash
-cargo build --release || exit 1
+[ -z "$TIMER" ] && (cargo build --release || exit 1)
 for n in $(seq 1 8); do
   echo '------'
   echo day $n

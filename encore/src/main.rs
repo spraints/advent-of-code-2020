@@ -1,5 +1,6 @@
 use std::env;
 use std::io::stdin;
+use std::time::Instant;
 
 mod common;
 
@@ -15,6 +16,7 @@ mod day7;
 mod day8;
 
 fn main() {
+    let start = Instant::now();
     let mut args = env::args();
     args.next();
     match args.next() {
@@ -31,4 +33,10 @@ fn main() {
             _ => println!("'{}' is not implemented.", arg),
         },
     };
+    if let Ok(_) = std::env::var("TIMER") {
+        println!(
+            "completed in {} milliseconds",
+            1000.0 * start.elapsed().as_secs_f32()
+        );
+    }
 }
