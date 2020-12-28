@@ -2,7 +2,7 @@ use super::common;
 
 pub fn run<T: std::io::Read>(input: T) {
     let mut numbers = common::parse_lines(input);
-    numbers.sort();
+    numbers.sort_unstable();
     let (a, b) = twosum(&numbers, 2020).unwrap();
     println!("part 1: {}", numbers[a] * numbers[b]);
     let (a, b, c) = threesum(&numbers, 2020).unwrap();
@@ -25,14 +25,11 @@ fn twosum(numbers: &[i64], goal: i64) -> Option<(usize, usize)> {
     let mut a = 0;
     let mut b = numbers.len() - 1;
     while a < b {
-        let sum = numbers[a] + numbers[b];
-        if sum == goal {
-            return Some((a, b));
-        } else if sum < goal {
-            a += 1;
-        } else {
-            b -= 1;
-        }
+        match numbers[a] + numbers[b] {
+            sum if sum == goal => return Some((a, b)),
+            sum if sum < goal => a += 1,
+            _ => b -= 1,
+        };
     }
     None
 }

@@ -22,7 +22,7 @@ const HCL: &str = "hcl";
 const ECL: &str = "ecl";
 const PID: &str = "pid";
 
-fn is_valid(passport: &Passport) -> bool {
+fn is_valid(passport: PassportRef) -> bool {
     let mut byr = false;
     let mut iyr = false;
     let mut eyr = false;
@@ -45,7 +45,7 @@ fn is_valid(passport: &Passport) -> bool {
     byr && iyr && eyr && hgt && hcl && ecl && pid
 }
 
-fn is_valid2(passport: &Passport) -> bool {
+fn is_valid2(passport: PassportRef) -> bool {
     /*
      * byr (Birth Year) - four digits; at least 1920 and at most 2002.
      * iyr (Issue Year) - four digits; at least 2010 and at most 2020.
@@ -80,12 +80,12 @@ fn is_valid2(passport: &Passport) -> bool {
     byr && iyr && eyr && hgt && hcl && ecl && pid
 }
 
-fn betw(v: &String, min: usize, max: usize) -> bool {
+fn betw(v: &str, min: usize, max: usize) -> bool {
     let v = v.parse().unwrap();
     min <= v && v <= max
 }
 
-fn is_valid_hgt(v: &String) -> bool {
+fn is_valid_hgt(v: &str) -> bool {
     let mut p = common::make_parser(v);
     let v = p.parse_usize();
     let p = p.rest();
@@ -97,7 +97,7 @@ fn is_valid_hgt(v: &String) -> bool {
     }
 }
 
-fn is_valid_hcl(v: &String) -> bool {
+fn is_valid_hcl(v: &str) -> bool {
     let mut v = v.chars();
     match v.next() {
         Some('#') => (),
@@ -113,17 +113,14 @@ fn is_valid_hcl(v: &String) -> bool {
             None => return false,
         };
     }
-    match v.next() {
-        None => true,
-        _ => false,
-    }
+    matches!(v.next(), None)
 }
 
-fn is_valid_ecl(v: &String) -> bool {
+fn is_valid_ecl(v: &str) -> bool {
     v == "amb" || v == "blu" || v == "brn" || v == "gry" || v == "grn" || v == "hzl" || v == "oth"
 }
 
-fn is_valid_pid(v: &String) -> bool {
+fn is_valid_pid(v: &str) -> bool {
     let mut v = v.chars();
     for _ in 0..9 {
         match v.next() {
@@ -135,10 +132,7 @@ fn is_valid_pid(v: &String) -> bool {
             None => return false,
         };
     }
-    match v.next() {
-        None => true,
-        _ => false,
-    }
+    matches!(v.next(), None)
 }
 
 fn merge_passports(lines: Vec<Line>) -> Vec<Passport> {
@@ -167,6 +161,7 @@ struct Line {
 }
 
 type Passport = Vec<(String, String)>;
+type PassportRef<'a> = &'a [(String, String)];
 
 impl FromStr for Line {
     type Err = ();

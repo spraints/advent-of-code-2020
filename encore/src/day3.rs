@@ -29,7 +29,7 @@ impl FromStr for Line {
     }
 }
 
-fn count_trees(grid: &Vec<Line>, right: usize, down: usize) -> usize {
+fn count_trees(grid: &[Line], right: usize, down: usize) -> usize {
     let (mut row, mut col) = (0, 0);
     let mut res = 0;
     while row < grid.len() {

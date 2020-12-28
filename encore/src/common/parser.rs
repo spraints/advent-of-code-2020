@@ -36,15 +36,15 @@ impl<'a> Parser<'a> {
 
     pub fn parse_char(&mut self) -> Result<char, String> {
         self.next()
-            .ok_or("expected a char but there wasn't one".to_string())
+            .ok_or_else(|| "expected a char but there wasn't one".to_string())
     }
 
     pub fn expect(&mut self, c: char) -> Result<(), String> {
         match self.next() {
-            None => Err(format!("expected {:?} but got nothing", c).to_string()),
+            None => Err(format!("expected {:?} but got nothing", c)),
             Some(nc) => {
                 if nc != c {
-                    Err(format!("expected {:?} but got {:?}", c, nc).to_string())
+                    Err(format!("expected {:?} but got {:?}", c, nc))
                 } else {
                     Ok(())
                 }

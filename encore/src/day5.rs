@@ -2,9 +2,9 @@ use super::common;
 use std::io::Read;
 
 pub fn run<R: Read>(r: R) {
-    let mut passes: Vec<usize> = common::read_lines(r).map(|l| parse_pass(l)).collect();
+    let mut passes: Vec<usize> = common::read_lines(r).map(parse_pass).collect();
     println!("part 1: {}", passes.iter().max().unwrap());
-    passes.sort();
+    passes.sort_unstable();
     for (i, val) in passes.iter().enumerate() {
         if val + 1 != passes[i + 1] {
             println!("part 2: {}", val + 1);
