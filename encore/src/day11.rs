@@ -10,31 +10,12 @@ pub fn run<R: Read>(r: R) {
     );
     println!(
         "part 2: {}",
-        count_occupied(run_until_not_changed(room.clone(), &VisibleCounter {}, 5))
+        count_occupied(run_until_not_changed(room, &VisibleCounter {}, 5))
     );
 }
 
 fn run_until_not_changed<C: Counter>(mut room: Vec<Row>, counter: &C, max_vis: usize) -> Vec<Row> {
-    let mut n = 0;
     loop {
-        /*
-        println!("step {}:", n);
-        for r in &room {
-            for s in &r.spaces {
-                print!(
-                    "{}",
-                    match s {
-                        Space::Floor => ".",
-                        Space::Empty => "L",
-                        Space::Occupied => "#",
-                    }
-                );
-            }
-            println!();
-        }
-        */
-        n += 1;
-
         match update_spaces(&room, counter, max_vis) {
             None => return room,
             Some(newroom) => room = newroom,
@@ -98,11 +79,13 @@ impl Counter for VisibleCounter {
     fn count(&self, room: &[Row], row: usize, col: usize) -> usize {
         let mut res = 0;
         for (dr, dc) in DIR.iter() {
-                let mut n = 1;
-            //println!("[{}, {}]:", dr, dc);
+            let mut n = 1;
             loop {
                 match get_space(room, (row as i32) + n * dr, (col as i32) + n * dc) {
-                    Some(Space::Floor) => { n += 1; continue},
+                    Some(Space::Floor) => {
+                        n += 1;
+                        continue;
+                    }
                     Some(Space::Occupied) => res += 1,
                     _ => (),
                 };
@@ -118,40 +101,20 @@ fn get_space(room: &[Row], row: i32, col: i32) -> Option<Space> {
         return None;
     }
     room.get(row as usize)
-        .and_then(|row| row.spaces.get(col as usize).and_then(|sp| Some(*sp)))
+        .and_then(|row| row.spaces.get(col as usize).copied())
 }
 
 struct NeighborCounter {}
 
 impl Counter for NeighborCounter {
     fn count(&self, room: &[Row], row: usize, col: usize) -> usize {
-        /*
+        let mut res = 0;
         for (dr, dc) in DIR.iter() {
-            let r = (row as i32) + dr;
-            if r < 0 { continue; }
-            let c = (col as i32) + dc;
-            if c < 0 { continue; }
-            */
-
-        let min_row = if row > 0 { row - 1 } else { row };
-        let min_col = if col > 0 { col - 1 } else { col };
-        let mut count = 0;
-        for r in (min_row..=row + 1) {
-            match room.get(r) {
-                None => (),
-                Some(row_row) => {
-                    for c in (min_col..=col + 1) {
-                        if r != row || c != col {
-                            match row_row.spaces.get(c) {
-                                Some(Space::Occupied) => count += 1,
-                                _ => (),
-                            };
-                        }
-                    }
-                }
+            if let Some(Space::Occupied) = get_space(room, (row as i32) + dr, (col as i32) + dc) {
+                res += 1;
             }
         }
-        count
+        res
     }
 }
 
@@ -167,10 +130,7 @@ fn count_occupied_row(row: &Row) -> usize {
 }
 
 fn is_occupied_space(space: &Space) -> bool {
-    match space {
-        Space::Occupied => true,
-        _ => false,
-    }
+    matches!(space, Space::Occupied)
 }
 
 #[derive(Clone, Copy, Debug)]
