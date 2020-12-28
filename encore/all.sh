@@ -1,5 +1,6 @@
+#!/bin/bash
 cargo build --release || exit 1
-for n in 1 2 3 4 5 6; do
+for n in $(seq 1 7); do
   echo '------'
   echo day $n
   target/release/adventofcode2020 day${n} < ../fast/in/${n}
