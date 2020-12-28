@@ -24,27 +24,31 @@ impl<'a> Parser<'a> {
     fn next_digit(&mut self) -> Option<u32> {
         match self.ch.peek() {
             None => None,
-            Some(c) => if c.is_digit(10) {
-                self.next().and_then(|c| c.to_digit(10))
-            } else {
-                None
+            Some(c) => {
+                if c.is_digit(10) {
+                    self.next().and_then(|c| c.to_digit(10))
+                } else {
+                    None
+                }
             }
         }
     }
 
     pub fn parse_char(&mut self) -> Result<char, String> {
-        self.next().ok_or("expected a char but there wasn't one".to_string())
+        self.next()
+            .ok_or("expected a char but there wasn't one".to_string())
     }
 
     pub fn expect(&mut self, c: char) -> Result<(), String> {
         match self.next() {
             None => Err(format!("expected {:?} but got nothing", c).to_string()),
-            Some(nc) =>
+            Some(nc) => {
                 if nc != c {
                     Err(format!("expected {:?} but got {:?}", c, nc).to_string())
                 } else {
                     Ok(())
                 }
+            }
         }
     }
 

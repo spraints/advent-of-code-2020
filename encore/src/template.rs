@@ -21,6 +21,6 @@ impl FromStr for Line {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let mut p = common::make_parser(s);
         let n = p.parse_usize();
-        Ok(Self{n})
+        Ok(Self { n })
     }
 }
