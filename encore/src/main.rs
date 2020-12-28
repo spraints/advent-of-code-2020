@@ -12,6 +12,7 @@ mod day4;
 mod day5;
 mod day6;
 mod day7;
+mod day8;
 
 fn main() {
     let mut args = env::args();
@@ -26,6 +27,7 @@ fn main() {
             "day5" => day5::run(stdin()),
             "day6" => day6::run(stdin()),
             "day7" => day7::run(stdin()),
+            "day8" => day8::run(stdin()),
             _ => println!("'{}' is not implemented.", arg),
         },
     };

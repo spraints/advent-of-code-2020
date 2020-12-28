@@ -34,6 +34,18 @@ impl<'a> Parser<'a> {
         }
     }
 
+    pub fn parse_word(&mut self) -> String {
+        let mut res = String::new();
+        loop {
+            match self.ch.peek() {
+                None => break,
+                Some(c) if c.is_whitespace() => break,
+                Some(_) => res.push(self.ch.next().unwrap()),
+            };
+        }
+        res
+    }
+
     pub fn parse_char(&mut self) -> Result<char, String> {
         self.next()
             .ok_or_else(|| "expected a char but there wasn't one".to_string())
