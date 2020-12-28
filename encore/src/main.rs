@@ -3,6 +3,8 @@ use std::io::stdin;
 
 mod common;
 
+//mod template;
+
 mod day1;
 mod day2;
 mod day3;
