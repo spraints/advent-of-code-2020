@@ -1,13 +1,15 @@
 pub struct Parser<'a> {
     next: Option<char>,
     ch: std::str::Chars<'a>,
+    lag: std::str::Chars<'a>,
 }
 
 impl<'a> Parser<'a> {
     pub fn new(s: &'a str) -> Self {
         let mut ch = s.chars();
+        let lag = s.chars();
         let next = ch.next();
-        Self { ch, next }
+        Self { ch, next, lag }
     }
 
     pub fn parse_usize(&mut self) -> usize {
@@ -21,25 +23,32 @@ impl<'a> Parser<'a> {
                 },
             };
             self.next = self.ch.next();
+            self.lag.next();
         }
     }
 
     pub fn parse_char(&mut self) -> Result<char, String> {
         let res = self.next;
         self.next = self.ch.next();
+        self.lag.next();
         res.ok_or("expected a char but there wasn't one".to_string())
     }
 
     pub fn expect(&mut self, c: char) -> Result<(), String> {
         match self.next {
             None => return Err(format!("expected {:?} but got nothing", c).to_string()),
-            Some(nc) => if nc != c { return Err(format!("expected {:?} but got {:?}", c, nc).to_string()) },
+            Some(nc) => {
+                if nc != c {
+                    return Err(format!("expected {:?} but got {:?}", c, nc).to_string());
+                }
+            }
         }
         self.next = self.ch.next();
+        self.lag.next();
         Ok(())
     }
 
     pub fn rest(self) -> &'a str {
-        self.ch.as_str()
+        self.lag.as_str()
     }
 }
